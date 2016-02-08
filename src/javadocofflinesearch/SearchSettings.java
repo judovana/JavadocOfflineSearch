@@ -31,4 +31,8 @@ public interface SearchSettings {
     public int getDidYouMeantCount();
 
     public Formatter createFormatter(PrintStream out);
+
+    public int getstartAt();
+
+    public int getRecords();
 }

@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javadocofflinesearch.formatters.Formatter;
-import javadocofflinesearch.formatters.PlainTextFormatter;
 import javadocofflinesearch.htmlprocessing.MalformedXmlParser;
 import javadocofflinesearch.htmlprocessing.XmledHtmlToText;
-import javadocofflinesearch.tools.Commandline;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 

@@ -5,6 +5,7 @@
  */
 package javadocofflinesearch.tools;
 
+import java.io.Console;
 import java.io.PrintStream;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.JavadocOfflineSearch;
@@ -55,6 +56,10 @@ public class Commandline implements SearchSettings {
     public static final int didYouMeantCount = 10;
     private static final String DEAD_LINE = "did-you-mean-deadline";
     private static final String DID_COUNT = "did-you-mean-count";
+    private static final int startAtDefault = 0;
+    private static final String START_AT = "start-at";
+    private static final int showRecordsDefault = Integer.MAX_VALUE;
+    private static final String RECORDS = "records";
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -65,17 +70,19 @@ public class Commandline implements SearchSettings {
         Option noinfo = new Option("n", NO_INFO, false, "will NOT show snippets of string usages under title and link");
         Option moreinfo = new Option("m", MORE_INFO, false, "will (default) show snippets of string usages under title and link");
         Option server = new Option("s", START_SERVER, false, "will start the server on port 31745. You can then search in browser by http://lcoalhost:" + JavadocOfflineSearch.PORT);
-        Option file = new Option("f", FILE, false, "will prefix all files by file://");
+        Option file = new Option("f", FILE, false, "will NOT prefix all files by file://");
         Option merge = new Option("g", MERGE_COMAPRATORS, false, "will use both lucene and page sorting to determine results");
         Option exInfo = new Option("x", EXTRACT_INFO, true, "from given document, extract those ...info...  based on query");
-        Option infoBefore = new Option("B", INFO_BEFORE, true, " number of characters between '...' and 'match'. default " + defaultBefore);
-        Option infoAfter = new Option("A", INFO_AFTER, true, " number of characters between 'match' and '...'. default " + defaultAfter);
-        Option didDead = new Option("d", DEAD_LINE, true, " min. number of result to occure before 'did you ment' is suggested. default " + didYouMeantDeadLine);
-        Option didCount = new Option("D", DID_COUNT, true, " how meny 'did you ment' is suggested. default " + didYouMeantCount);
-        Option outputColor = new Option("c", OUTPUT_COLOUR, false, "will use colored shell output");
+        Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + defaultBefore);
+        Option infoAfter = new Option("A", INFO_AFTER, true, "number of characters between 'match' and '...'. default " + defaultAfter);
+        Option didDead = new Option("d", DEAD_LINE, true, "min. number of result to occure before 'did you ment' is suggested. default " + didYouMeantDeadLine);
+        Option didCount = new Option("D", DID_COUNT, true, "how meny 'did you ment' is suggested. default " + didYouMeantCount);
+        Option startAtOpt = new Option("R", START_AT, true, "start at record #number. Default  " + startAtDefault);
+        Option recordsOpt = new Option("r", RECORDS, true, "show number of recods #number. Default  " + showRecordsDefault);
+        Option outputColor = new Option("c", OUTPUT_COLOUR, false, "will use colored shell output (default in terminal)");
         Option outputHtml = new Option("t", OUTPUT_HTML, false, "will force html marked up output");
         Option outputAjax = new Option("a", OUTPUT_AJAX, false, "will force html marked up with ajax info snippets");
-        Option outputPlain = new Option("y", OUTPUT_PLAIN, false, "will use simple palintext output (default)");
+        Option outputPlain = new Option("y", OUTPUT_PLAIN, false, "will use simple palintext output (default out of terminal)");
 
         Option search = new Option("q", QUERY, true, "is considered default when no argument is given. Search docs. '-' connected wth word is NOT.");
 
@@ -100,6 +107,8 @@ public class Commandline implements SearchSettings {
         options.addOption(infoBefore);
         options.addOption(didDead);
         options.addOption(didCount);
+        options.addOption(startAtOpt);
+        options.addOption(recordsOpt);
         this.args = args;
 
     }
@@ -131,6 +140,14 @@ public class Commandline implements SearchSettings {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("Javadoc offline search", options);
             System.out.println("When used from commandline, it is expected to run with `more`.");
+            System.out.println("When run with `more` please set colors (-c) manually.");
+            System.out.println("* java -jar JavadocOfflineSearch.jar -index");
+            System.out.println("* java -jar JavadocOfflineSearch.jar  -query");
+            System.out.println("* index all files in $XDG_CONFIG_DIR/JavadocOfflineSearch/javadocOfflineSearch.properties");
+            System.out.println("* by default " + Setup.VALUE);
+            System.out.println("to use firefox search plugin comaptible and/or commandline approach run:");
+            System.out.println("* java -jar JavadocOfflineSearch.jar  -start-server & firefox");
+
             System.exit(0);
         }
     }
@@ -220,7 +237,7 @@ public class Commandline implements SearchSettings {
 
     @Override
     public boolean isFileForced() {
-        return line.hasOption(FILE);
+        return !line.hasOption(FILE);
     }
 
     @Override
@@ -276,6 +293,24 @@ public class Commandline implements SearchSettings {
         }
     }
 
+    @Override
+    public int getstartAt() {
+        if (line.hasOption(START_AT)) {
+            return Integer.valueOf(line.getOptionValue(START_AT));
+        } else {
+            return startAtDefault;
+        }
+    }
+
+    @Override
+    public int getRecords() {
+        if (line.hasOption(RECORDS)) {
+            return Integer.valueOf(line.getOptionValue(RECORDS));
+        } else {
+            return showRecordsDefault;
+        }
+    }
+
     private boolean isHtml() {
         return line.hasOption(OUTPUT_HTML);
     }
@@ -294,10 +329,12 @@ public class Commandline implements SearchSettings {
         cmds.checkVersion();
         cmds.verifyIndex();
         cmds.verifyServer();
-        cmds.checkDupes();
-        cmds.verifyQeury();
-        cmds.checkFormatters();
-        cmds.checkExtractInfo();
+        if (!(hasIndex() || hasServer())) {
+            cmds.checkDupes();
+            cmds.verifyQeury();
+            cmds.checkFormatters();
+            cmds.checkExtractInfo();
+        }
     }
 
     private void checkExtractInfo() {
@@ -340,13 +377,35 @@ public class Commandline implements SearchSettings {
         } else if (isColoured()) {
             return new ColoredPlainTextFormatter(out);
         } else if (isHtml()) {
-            return new StaticHtmlFormatter();
+            return new StaticHtmlFormatter(out);
         } else if (isAjax()) {
-            return new AjaxHtmlFormatter();
+            return new AjaxHtmlFormatter(out);
         } else {
-            return new PlainTextFormatter(out);
+            if (System.console() == null || isWindows()) {
+                return new PlainTextFormatter(out);
+            } else {
+                return new ColoredPlainTextFormatter(out);
+            }
+
         }
 
+    }
+
+    private static String OS = null;
+
+    public static String getOsName() {
+        if (OS == null) {
+            OS = System.getProperty("os.name");
+        }
+        return OS;
+    }
+
+    public static boolean isWindows() {
+        return getOsName().toLowerCase().startsWith("windows");
+    }
+
+    public static boolean isUnix() {
+        return !isWindows();
     }
 
 }

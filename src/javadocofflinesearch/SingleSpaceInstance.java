@@ -1,8 +1,6 @@
 package javadocofflinesearch;
 
 import java.io.File;
-import javadocofflinesearch.formatters.Formatter;
-import javadocofflinesearch.lucene.InfoExtractor;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.tools.Commandline;
 import javadocofflinesearch.tools.Setup;
@@ -31,16 +29,15 @@ public class SingleSpaceInstance {
                     Thread.sleep(100);
                 }
             } else if (cmds.isExctractInfo()) {
-                String s = InfoExtractor.extract(cmds.getExctractInfo(), cmds.getQuery(), cmds.createFormatter(System.out),  cmds.getInfoBefore(), cmds.getInfoAfter());
-                System.out.println(s);
+                cmds.createFormatter(System.out).summary(cmds.getExctractInfo(), cmds.getQuery(),   cmds.getInfoBefore(), cmds.getInfoAfter());
             } else {
-                MainIndex mainIndex = new MainIndex(cache);
+                MainIndex mainIndex = new MainIndex(cache, setup);
                 if (cmds.hasIndex()) {
-                    mainIndex.index(setup.getDirs());
+                    mainIndex.index();
                     return;
                 }
                 if (!mainIndex.checkInitialized()){
-                    System.out.println(mainIndex.printInitialized());
+                    cmds.createFormatter(System.out).initializationFailed(mainIndex.printInitialized());
                     System.exit(10);
                 }
                 mainIndex.search(cmds.getQuery(), cmds);

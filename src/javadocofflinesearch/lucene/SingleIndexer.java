@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
+import javadocofflinesearch.tools.Setup;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongField;
@@ -29,13 +30,13 @@ import org.apache.lucene.index.Term;
 public class SingleIndexer implements Runnable {
 
     private final IndexWriter writer;
-    private final Path[] sources;
+    private final IndexerSettings setup;
     private final XmledHtmlToText htmlizer;
     private int files = 0;
 
-    SingleIndexer(IndexWriter writer, XmledHtmlToText htmlizer, Path... sources) {
+    SingleIndexer(IndexWriter writer, XmledHtmlToText htmlizer, IndexerSettings setup) {
         this.writer = writer;
-        this.sources = sources;
+        this.setup = setup;
         this.htmlizer = htmlizer;
     }
 
@@ -43,6 +44,7 @@ public class SingleIndexer implements Runnable {
     public void run() {
         Date start = new Date();
         try {
+            Path[] sources = setup.getDirs();
             indexDocs(writer, sources);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -75,28 +77,24 @@ public class SingleIndexer implements Runnable {
             return;
         }
         for (File path1 : paths) {
-            String n = path1.getName().toLowerCase();
-            if (n.equals("allclasses-noframe.html")) {
-                continue;
-            }
-            if (n.equals("object.html")) {
-                continue;
-            }
-            if (n.equals("deprecated-list.html")) {
-                continue;
-            }
-            if (n.equals("index-1.html")) {
-                continue;
-            }
-            if (n.equals("overview-summary.html")) {
-                continue;
-            }
-            if (n.equals("package-frame.html")) {
-                continue;
-            }
+
             if (path1.isDirectory()) {
                 indexDocs(writer, path1.listFiles());
             } else {
+                String name = path1.getName().toLowerCase();
+                if (!setup.isSuffixCaseInsensitiveIncluded(path1.getName())) {
+                    System.out.println("Skipped " + path1);
+                    continue;
+                }
+                //other may be included at least in vocebularry or pageindex
+                if (!setup.isFilenameCaseInsensitiveIncluded(path1.getName()) && !setup.isExcldedFileIncludedInRanks()) {
+                    System.out.println("Skipped " + path1);
+                    continue;
+                }
+                if (!setup.isPathCaseInsensitiveIncluded(path1) && !setup.isExcldedFileIncludedInRanks()) {
+                    System.out.println("Skipped " + path1);
+                    continue;
+                }
                 indexDoc(writer, path1);
             }
         }
@@ -107,10 +105,6 @@ public class SingleIndexer implements Runnable {
      */
     private void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
         files++;
-        String name = file.getFileName().toString().toLowerCase();
-        if (name.endsWith(".jpeg") || name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".gif")) {
-            return;
-        }
         try (InputStream stream = htmlizer.parseAnother(MalformedXmlParser.xmlizeInputStream(Files.newInputStream(file)), file)) {
             // make a new, empty document
             Document doc = new Document();
@@ -139,6 +133,10 @@ public class SingleIndexer implements Runnable {
             // If that's not the case searching for special characters will fail.
             doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
 
+            if (!(setup.isFilenameCaseInsensitiveIncluded(file.toFile().getName()) && setup.isPathCaseInsensitiveIncluded(file.toFile()))) {
+                System.out.println("Processed, but NOT added: " + file);
+                return;
+            }
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
                 // New index, so we just add the document (no old document can be there):
                 System.out.println("adding " + file);

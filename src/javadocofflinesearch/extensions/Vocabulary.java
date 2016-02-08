@@ -29,7 +29,6 @@ public class Vocabulary {
         return file;
     }
 
-    
     public Vocabulary(File cache) {
         this.file = new File(cache, "vocabulary");
     }
@@ -74,12 +73,15 @@ public class Vocabulary {
         }
     }
 
-    public List<String> didYouMean(String... queryString) {
-        return didYouMean(10, queryString);
-    }
-
-    public List<String> didYouMean(int count, String... queryStrings) {
-        List<String> result = new ArrayList<>(count);
+    /**
+     * this one takes ALL querySAtrings, put them to ONE list, then sort and
+     * take best of ALL
+     *
+     * @param count
+     * @param queryStrings
+     * @return
+     */
+    public List<String> didYouMeanORIG(int count, String... queryStrings) {
         List<ResultWithDistance> r = new ArrayList<>();
         for (String queryString : queryStrings) {
             for (String voc1 : voc) {
@@ -88,6 +90,7 @@ public class Vocabulary {
             }
         }
         Collections.sort(r);
+        List<String> result = new ArrayList<>(count);
         int i = 0;
         for (ResultWithDistance r1 : r) {
             i++;
@@ -99,11 +102,45 @@ public class Vocabulary {
         return result;
     }
 
-   
+    /**
+     * this one takes ALL querySAtrings, put them to ALL lists, then sort and
+     * take best of EACH
+     *
+     * @param count
+     * @param queryStrings
+     * @return
+     */
+    public List<String> didYouMean(int count, String... queryStrings) {
+        List<String> result = new ArrayList<>(count*queryStrings.length);
+        for (String queryString : queryStrings) {
+            result.addAll(didYouMean(count, queryString));
+        }
+        return result;
+    }
+
+    public List<String> didYouMean(int count, String queryString) {
+        List<ResultWithDistance> r = new ArrayList<>();
+        for (String voc1 : voc) {
+            int l = LevenshteinDistance.levenshteinDistance(voc1, queryString);
+            r.add(new ResultWithDistance(l, voc1));
+        }
+        Collections.sort(r);
+        List<String> result = new ArrayList<>(count);
+        int i = 0;
+        for (ResultWithDistance r1 : r) {
+            i++;
+            if (i >= count) {
+                break;
+            }
+            result.add(r1.word);
+        }
+        return result;
+    }
+
     public boolean isEmpty() {
         return voc.isEmpty();
     }
-    
+
     public int size() {
         return voc.size();
     }
