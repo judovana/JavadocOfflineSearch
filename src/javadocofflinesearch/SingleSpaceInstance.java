@@ -2,6 +2,7 @@ package javadocofflinesearch;
 
 import java.io.File;
 import javadocofflinesearch.lucene.MainIndex;
+import javadocofflinesearch.server.ServerLauncher;
 import javadocofflinesearch.tools.Commandline;
 import javadocofflinesearch.tools.Setup;
 
@@ -25,22 +26,26 @@ public class SingleSpaceInstance {
         try {
             setup.load();
             if (cmds.hasServer()) {
+                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT, setup, cache);
+                Thread r = new Thread(lServerLuncher);
+                r.setDaemon(true);
+                r.start();
                 while (true) {
                     Thread.sleep(100);
                 }
             } else if (cmds.isExctractInfo()) {
-                cmds.createFormatter(System.out).summary(cmds.getExctractInfo(), cmds.getQuery(),   cmds.getInfoBefore(), cmds.getInfoAfter());
+                cmds.createFormatter(System.out).summary(cmds.getExctractInfo(), cmds.getQuery(), cmds.getInfoBefore(), cmds.getInfoAfter());
             } else {
                 MainIndex mainIndex = new MainIndex(cache, setup);
                 if (cmds.hasIndex()) {
                     mainIndex.index();
                     return;
                 }
-                if (!mainIndex.checkInitialized()){
+                if (!mainIndex.checkInitialized()) {
                     cmds.createFormatter(System.out).initializationFailed(mainIndex.printInitialized());
                     System.exit(10);
                 }
-                mainIndex.search(cmds.getQuery(), cmds);
+                mainIndex.search(cmds.getQuery(), cmds, System.out);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

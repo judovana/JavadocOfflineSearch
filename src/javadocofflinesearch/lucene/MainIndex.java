@@ -5,6 +5,7 @@ import javadocofflinesearch.extensions.PagedScoreDocs;
 import javadocofflinesearch.extensions.Vocabulary;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,8 +93,8 @@ public class MainIndex {
         }
     }
 
-    public void search(String queryString, SearchSettings settings) throws IOException, ParseException {
-        Formatter f = settings.createFormatter(System.out);
+    public void search(String queryString, SearchSettings settings, PrintStream out) throws IOException, ParseException {
+        Formatter f = settings.createFormatter(out);
         f.haders();
         queryString = queryString.trim();
         if (queryString.length() == 0) {
