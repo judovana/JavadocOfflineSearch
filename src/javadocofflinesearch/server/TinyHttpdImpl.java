@@ -37,12 +37,16 @@
 package javadocofflinesearch.server;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Date;
 import java.util.StringTokenizer;
+import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.lucene.MainIndex;
 
 /**
@@ -85,6 +89,10 @@ public class TinyHttpdImpl extends Thread {
             try {
                 while (canRun) {
                     String line = reader.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    System.out.println(": " + line);
                     if (line.length() < 1) {
                         break;
                     }
@@ -102,36 +110,64 @@ public class TinyHttpdImpl extends Thread {
 
                     String filePath = t.nextToken();
 
-                    {
+                    System.out.println(request + ": " + filePath);
 
-                        System.out.println("Getting- " + request + ": " + filePath);
+//css, hml, images.. rather dont include and hope browser will do the best                        
+//                        String contentType = "Content-Type: ";
+//                        contentType += "text/html";
+                    String contentType = "";
+                    contentType += CRLF;
 
-                        System.out.println("Serving- " + request + ": " + filePath);
+                    if (isGetRequest) {
+                        String potentionalFile = filePath.replaceAll("\\?.*", "");
+                        File resource = new File(potentionalFile);
+                        if (filePath.trim().length() > 1 && resource.exists()) {
+                            System.out.println("Returning file: " + resource.getAbsolutePath());
+                            //this is learning, more this hreff is clicked, more is recorded
+                            mainIndex.clickedHrefTo(resource.getAbsolutePath());
+                            int resourceLength = (int) resource.length();
+                            byte[] buff = new byte[resourceLength];
+                            try (FileInputStream fis = new FileInputStream(resource)) {
+                                fis.read(buff);
+                            }
+                            String lastModified = "Last-Modified: " + new Date(resource.lastModified()) + CRLF;
+                            writer.print(HTTP_OK + "Content-Length:" + resourceLength + CRLF + lastModified + contentType + CRLF);
+                            writer.write(buff, 0, resourceLength);
 
-                        String contentType = "Content-Type: ";
-                        contentType += "text/html";
+                        } else {
+                            if (filePath.trim().length() <= 1) {
+                                SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer);
+                                writer.print(HTTP_OK + contentType + CRLF);
+                                xr.haders();
+                                xr.tail();
 
-                        if (isGetRequest) {
-                            {
-                                WebParams cmds = new WebParams(filePath.substring(2));
-                                writer.print(HTTP_OK + contentType + CRLF + CRLF);
-                                if (!mainIndex.checkInitialized()) {
-                                    cmds.createFormatter(writer).initializationFailed(mainIndex.printInitialized());
-// SHIT! sevuj aji fajly! http://kb.mozillazine.org/Links_to_local_pages_do_not_work
+                            } else {
+                                String command = filePath.replaceAll("\\?.*", "");
+                                String query = filePath.replaceFirst(".*?\\?", "");
+                                if (command.toLowerCase().equals("/search")) {
+                                    WebParams cmds = new WebParams(query);
+                                    writer.print(HTTP_OK + contentType + CRLF);
+                                    if (!mainIndex.checkInitialized()) {
+                                        cmds.createFormatter(writer).initializationFailed(mainIndex.printInitialized());
+                                    } else {
+
+                                        mainIndex.search(cmds.getQuery(), cmds, writer);
+                                    }
                                 } else {
-                                    mainIndex.search(cmds.getQuery(), cmds, writer);
+                                    writer.print(HTTP_NOT_FOUND);
                                 }
                             }
-                        } else {
-                            writer.print(HTTP_NOT_IMPLEMENTED + CRLF);
-
                         }
+                    } else {
+                        writer.print(HTTP_NOT_IMPLEMENTED + CRLF);
+
                     }
                 }
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (Exception e) {
-                writer.print(HTTP_NOT_FOUND);
+                writer.print(HTTP_OK + "" + CRLF);
+                e.printStackTrace(writer);
                 e.printStackTrace();
             } finally {
                 reader.close();

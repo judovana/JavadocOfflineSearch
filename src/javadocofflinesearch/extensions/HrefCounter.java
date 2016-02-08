@@ -31,7 +31,6 @@ public class HrefCounter {
         return file;
     }
 
-    
     public HrefCounter(File cache) {
         this.file = new File(cache, "pageIndex");
     }
@@ -64,6 +63,7 @@ public class HrefCounter {
     public void loadHrefs() throws IOException {
         loadHrefs(file);
     }
+
     private void loadHrefs(File f) throws IOException {
         loadHrefs(f, true);
     }
@@ -89,6 +89,10 @@ public class HrefCounter {
     }
 
     public void addLink(String s, Path current) {
+        addLink(s, current, false);
+    }
+
+    public void addLink(String s, Path current, boolean differentPalnet) {
 
         if (!s.contains("://")) {
             int ii = s.lastIndexOf("?");
@@ -100,12 +104,14 @@ public class HrefCounter {
                 s = s.substring(0, ii);
             }
             if (!s.isEmpty()) {
-                if (s.startsWith("/")) {
-                    s = s.substring(1);
+                if (!differentPalnet) {
+                    if (s.startsWith("/")) {
+                        s = s.substring(1);
+                    }
+                    s = absolutizeLink(s, current.getParent()/*parent, as we need direcotry, not file*/);
                 }
-                s = absolutizeLink(s, current.getParent()/*parent, as we need direcotry, not file*/);
-                countPoints(s);
             }
+            countPoints(s);
         }
     }
 

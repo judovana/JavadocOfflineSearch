@@ -6,13 +6,14 @@
 package javadocofflinesearch.formatters;
 
 import java.io.PrintStream;
-import javadocofflinesearch.lucene.InfoExtractor;
+
 
 /**
- *
+ *Was intended to dont include the extracted testxts, but without content length browsers do ojust ok. so no need to implement this ever.
+ * 
  * @author jvanek
  */
-public class AjaxHtmlFormatter extends StaticHtmlFormatter{
+public class AjaxHtmlFormatter extends SearchableHtmlFormatter{
 
     public AjaxHtmlFormatter(PrintStream out) {
         super(out);

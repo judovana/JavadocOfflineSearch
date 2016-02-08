@@ -176,4 +176,15 @@ public class MainIndex {
         }
     }
 
+    public synchronized void clickedHrefTo(String absolutePath) {
+        try {
+            if (absolutePath.toLowerCase().endsWith(".html") && hc.size() > 0) {
+                hc.addLink(absolutePath, new File(absolutePath).toPath(), true);
+                hc.saveHrefs();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

@@ -16,6 +16,7 @@ import javadocofflinesearch.lucene.InfoExtractor;
 public class StaticHtmlFormatter implements Formatter {
 
     protected final PrintStream out;
+    private static final boolean cdata = false;
 
     public StaticHtmlFormatter(PrintStream out) {
         this.out = out;
@@ -68,7 +69,10 @@ public class StaticHtmlFormatter implements Formatter {
         for (List<String> l1 : l) {
             if (l1 != null && l1.size() > 0) {
                 out.print("<div>"); //format to columns!
-                out.print("<small>"); 
+                out.print("<small>");
+                if (cdata) {
+                    out.print("<![CDATA[");
+                }
                 for (String l11 : l1) {
                     color = !color;
                     if (color) {
@@ -80,7 +84,10 @@ public class StaticHtmlFormatter implements Formatter {
                     }
                     out.println(" , ");
                 }
-                out.print("</small>"); 
+                if (cdata) {
+                    out.print("]]>");
+                }
+                out.print("</small>");
                 out.print("</div>");
                 out.println("");
             }
@@ -112,9 +119,15 @@ public class StaticHtmlFormatter implements Formatter {
             ex.printStackTrace();
             sumamry = ex.toString();
         }
-        out.print("<small>"); 
+        out.print("<small>");
+        if (cdata) {
+            out.print("<![CDATA[");
+        }
         out.println(sumamry);
-        out.print("</small>"); 
+        if (cdata) {
+            out.print("]]>");
+        }
+        out.print("</small>");
         out.println("</div>");
         out.println("<br/>");
     }
