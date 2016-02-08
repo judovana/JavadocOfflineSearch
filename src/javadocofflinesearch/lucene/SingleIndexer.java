@@ -2,7 +2,6 @@ package javadocofflinesearch.lucene;
 
 import javadocofflinesearch.htmlprocessing.MalformedXmlParser;
 import javadocofflinesearch.htmlprocessing.XmledHtmlToText;
-import javadocofflinesearch.extensions.Vocabulary;
 import javadocofflinesearch.tools.TitledByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,10 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
-import javadocofflinesearch.tools.Setup;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
@@ -83,7 +80,7 @@ public class SingleIndexer implements Runnable {
             } else {
                 String name = path1.getName().toLowerCase();
                 if (!setup.isSuffixCaseInsensitiveIncluded(path1.getName())) {
-                    System.out.println("Skipped " + path1);
+                    System.out.println("Skipped (non indexable)" + path1);
                     continue;
                 }
                 //other may be included at least in vocebularry or pageindex
