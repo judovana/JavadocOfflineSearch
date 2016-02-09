@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,11 @@ public class Vocabulary {
     }
 
     public void add(String[] nwv) {
-        voc.addAll(Arrays.asList(nwv));
+        for (String s : nwv) {
+            if (s.length() > 2) {
+                voc.add(s);
+            }
+        }
     }
 
     public void saveVocs() throws IOException {
@@ -111,7 +114,7 @@ public class Vocabulary {
      * @return
      */
     public List<String> didYouMean(int count, String... queryStrings) {
-        List<String> result = new ArrayList<>(count*queryStrings.length);
+        List<String> result = new ArrayList<>(count * queryStrings.length);
         for (String queryString : queryStrings) {
             result.addAll(didYouMean(count, queryString));
         }

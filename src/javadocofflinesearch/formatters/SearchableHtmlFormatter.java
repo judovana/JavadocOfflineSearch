@@ -6,6 +6,7 @@
 package javadocofflinesearch.formatters;
 
 import java.io.PrintStream;
+import java.util.Date;
 import javadocofflinesearch.server.WebParams;
 
 /**
@@ -26,12 +27,22 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         super(out);
         this.defaults = defaults;
     }
+    
+     @Override
+    public void file(final String url, int page, float score) {
+        String href=url.substring(url.indexOf("///")+2);
+        if (url.startsWith("jar")){
+            //appearently ! in middle is enugh :)
+        }
+        out.println("<big><b><a href='" + href + "'>" + url + "</a>: </b></big>" + page + "/" + score + "<br/>");
+    }
 
     @Override
     public void haders() {
         super.haders();
         out.println("<small>Yes, this is not an google, so there is few more sttings...</small><br>");
         out.println("<h2 align=\"center\">JavaDoc Offline Search</h2>");
+        out.println("<h6 align=\"center\">"+new Date()+"</h6>");
         out.println("<form action='search'>");
         out.println("<span  style=\"text-align: center\">");
         out.println("<input type=\"radio\" name=\"search-type\" value=\"page-index\" "+getCheckedPage()+"> use page index (it learns!)");

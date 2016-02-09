@@ -4,9 +4,11 @@ import java.io.IOException;
 import javadocofflinesearch.extensions.Vocabulary;
 import javadocofflinesearch.tools.TitledByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import javadocofflinesearch.extensions.HrefCounter;
+import javadocofflinesearch.tools.LevenshteinDistance;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,7 +40,7 @@ public class XmledHtmlToText {
         return vc;
     }
 
-    public InputStream parseAnother(InputStream hoefullyXmlizedInputStream, Path current) {
+    public InputStream parseAnother(InputStream hoefullyXmlizedInputStream, URL current) {
         try {
             String[] l = parseAnotherII(hoefullyXmlizedInputStream, current, true);
             return new TitledByteArrayInputStream(l[0], l[1].getBytes(StandardCharsets.UTF_8));
@@ -49,7 +51,7 @@ public class XmledHtmlToText {
         }
     }
 
-    public String[] parseAnotherII(InputStream hoefullyXmlizedInputStream, Path current, boolean stats) throws ParserConfigurationException, SAXException, IOException {
+    public String[] parseAnotherII(InputStream hoefullyXmlizedInputStream, URL current, boolean stats) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuild = dbf.newDocumentBuilder();
         Document doc = docBuild.parse(hoefullyXmlizedInputStream);
@@ -81,7 +83,7 @@ public class XmledHtmlToText {
 
         }
         if (title == null && current != null) {
-            title = current.toAbsolutePath().toString();
+            title = LevenshteinDistance.sanitizeFileUrl(current);
         }
         hoefullyXmlizedInputStream.close();
         if (stats) {

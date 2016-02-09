@@ -1,0 +1,8 @@
+<SearchPlugin xmlns="http://www.mozilla.org/2006/browser/search/" xmlns:os="http://a9.com/-/spec/opensearch/1.1/">
+<os:ShortName>Javadoc offline search</os:ShortName>
+<os:Description>Quick search in your indexed documets. Run java -jar JavadocOfflineSearch.jar  -start-server to start server.</os:Description>
+<os:InputEncoding>UTF-8</os:InputEncoding>
+<os:Image width="16" height="16">data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAABxcYQA+fn5AOvr6wChoaMATU1UAM/PzQABAY4AAQGvAAAA2AABAWIACgopAAAAygAAAMwAAAAAAP///wAAAAAA7u7u7u4e7u7u7u7u7jXu7u7u7u7uLT7u7u7u4dDjpETuIu7uVeWt3VPR5UQABK3drVE0l3d3dq3aMHu4zMzIetpsyIu7u7vJp8iHaby7zIm8h5rZvLu3ari5qWjLuGrdqZm4jLvMnd3d27qWzIet3d3Ztnu2tt3a3dp4y5qa3a0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</os:Image>
+<os:Url type="text/html" method="GET" template="http://localhost:31754/search?query={searchTerms}" resultDomain="bugzilla.redhat.com">
+</os:Url>
+</SearchPlugin>

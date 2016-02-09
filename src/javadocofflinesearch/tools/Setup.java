@@ -22,16 +22,18 @@ public class Setup implements IndexerSettings {
 
     private static final String DIRS = "docs.dirs";
     public static final String VALUE = "/usr/share/javadoc/java";
+    public static final String SEMICOLON = ";";
 
     private static final String NLE = "ignore.name.lower.equals";
-    private static final String NLE_VALUE = "allclasses-noframe.html:object.html:deprecated-list.html:index-1.html:overview-summary.html:package-frame.html";
+    private static final String NLE_VALUE = "allclasses-noframe.html" + SEMICOLON
+            + "object.html" + SEMICOLON + "deprecated-list.html" + SEMICOLON + "index-1.html" + SEMICOLON + "overview-summary.html" + SEMICOLON + "package-frame.html";
     private static final String PLC = "ignore.path.lower.contains";
     private static final String PLC_VALUE = "/class-use/";
     private static final String INCLUDE = "ignore.include.forpageandvoc";
     private static final boolean INCLUDE_VAL = false;
-    private static final String SUFFIXES="ignore.lower.endwith";
-    private static final String SUFFIXES_VAl=".jpeg:.jpg:.png:.gif";
-    
+    private static final String SUFFIXES = "ignore.lower.endwith";
+    private static final String SUFFIXES_VAl = ".jpeg" + SEMICOLON + ".jpg" + SEMICOLON + ".png" + SEMICOLON + ".gif";
+
     private final File MAIN_CONFIG;
     Properties p = new Properties();
 
@@ -55,27 +57,27 @@ public class Setup implements IndexerSettings {
             p.setProperty(PLC, PLC_VALUE);
             p.setProperty(INCLUDE, String.valueOf(INCLUDE_VAL));
             p.setProperty(SUFFIXES, SUFFIXES_VAl);
-            p.store(new FileOutputStream(MAIN_CONFIG), null);
+            p.store(new FileOutputStream(MAIN_CONFIG), "All lists are semicolon separated.");
         }
     }
 
     private String[] getDirsString() {
-        String[] dirs = p.getProperty(DIRS).split(File.pathSeparator);
+        String[] dirs = p.getProperty(DIRS).split(SEMICOLON);
         return dirs;
     }
 
     private String[] getNLE() {
-        String[] ignredNames = p.getProperty(NLE).split(File.pathSeparator);
+        String[] ignredNames = p.getProperty(NLE).split(SEMICOLON);
         return ignredNames;
     }
-    
-     private String[] getSuffixes() {
-        String[] ignredSuffs = p.getProperty(SUFFIXES).split(File.pathSeparator);
+
+    private String[] getSuffixes() {
+        String[] ignredSuffs = p.getProperty(SUFFIXES).split(SEMICOLON);
         return ignredSuffs;
     }
 
     private String[] getPLC() {
-        String[] ignredPaths = p.getProperty(PLC).split(File.pathSeparator);
+        String[] ignredPaths = p.getProperty(PLC).split(SEMICOLON);
         return ignredPaths;
     }
 
@@ -95,7 +97,7 @@ public class Setup implements IndexerSettings {
         }
         return true;
     }
-    
+
     @Override
     public boolean isSuffixCaseInsensitiveIncluded(String fileName) {
         fileName = fileName.toLowerCase();

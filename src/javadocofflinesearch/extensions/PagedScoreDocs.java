@@ -35,12 +35,7 @@ public class PagedScoreDocs {
         this.arr = arr;
         this.path = doc.get("path");
         this.title = doc.get("title");
-        Integer p = hc.getPageIndex(path);
-        if (p == null) {
-            page = 0;
-        } else {
-            page = p;
-        }
+        this.page = hc.getPageIndex(path);
 
     }
 

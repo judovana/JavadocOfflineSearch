@@ -15,9 +15,11 @@ public class SingleSpaceInstance {
     private final File cache;
     private final Commandline cmds;
     private final Setup setup;
+    private final File config;
 
     SingleSpaceInstance(File CONFIG, File CACHE, Commandline cmds) {
         cache = CACHE;
+        config = CONFIG;
         setup = new Setup(CONFIG);
         this.cmds = cmds;
     }
@@ -26,7 +28,7 @@ public class SingleSpaceInstance {
         try {
             setup.load();
             if (cmds.hasServer()) {
-                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT, setup, cache);
+                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT, setup, cache, config);
                 Thread r = new Thread(lServerLuncher);
                 r.setDaemon(true);
                 r.start();
@@ -36,7 +38,7 @@ public class SingleSpaceInstance {
             } else if (cmds.isExctractInfo()) {
                 cmds.createFormatter(System.out).summary(cmds.getExctractInfo(), cmds.getQuery(), cmds.getInfoBefore(), cmds.getInfoAfter());
             } else {
-                MainIndex mainIndex = new MainIndex(cache, setup);
+                MainIndex mainIndex = new MainIndex(cache, config, setup);
                 if (cmds.hasIndex()) {
                     mainIndex.index();
                     return;

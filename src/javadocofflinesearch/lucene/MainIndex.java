@@ -6,6 +6,7 @@ import javadocofflinesearch.extensions.Vocabulary;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,9 +44,9 @@ public class MainIndex {
     private final File INDEX;
     private final Setup setup;
 
-    public MainIndex(File cache, Setup setup) throws IOException {
+    public MainIndex(File cache, File config, Setup setup) throws IOException {
         INDEX = new File(cache, "javadocIndex.index");
-        this.hc = new HrefCounter(cache);
+        this.hc = new HrefCounter(cache, config);
         this.vocabualry = new Vocabulary(cache);
         this.htmlizer = new XmledHtmlToText(hc, vocabualry);
         this.setup = setup;
@@ -70,7 +71,7 @@ public class MainIndex {
         s += "Your documents were probably not yet indexed or are corrupted\n";
         s += "Run `java -jar JavadocOfflineSearch.jar - index` to fix: \n";
         s += INDEX.getAbsolutePath() + " - " + INDEX.exists() + "\n";
-        s += hc.getFile().getAbsolutePath() + " records: " + hc.size() + "\n";
+        s += hc.getFile1().getAbsolutePath() + " records: " + hc.size() + "\n";
         s += vocabualry.getFile().getAbsolutePath() + " records: " + vocabualry.size() + "\n";
         s += "Your may also check content of:\n";
         s += setup.getMAIN_CONFIG().getAbsolutePath() + "\n";
@@ -155,10 +156,14 @@ public class MainIndex {
             int to = Math.min(wrapped.length - 1, settings.getstartAt() + settings.getRecords());
             for (int i = from; i <= to; i++) {
                 PagedScoreDocs doc = wrapped[i];
-                f.title((i + 1), found.totalHits, doc.getTitle());
-                f.file(prefix(settings.isFileForced()) + doc.getPath(), doc.getPage(), doc.getArr().score);
-                if (settings.isInfo()) {
-                    f.summary(doc.getPath(), queryString, settings.getInfoBefore(), settings.getInfoAfter());
+                if (settings.isOmitArchives() && doc.getPath().startsWith("jar")) {
+
+                } else {
+                    f.title((i + 1), found.totalHits, doc.getTitle());
+                    f.file(doc.getPath(), doc.getPage(), doc.getArr().score);
+                    if (settings.isInfo()) {
+                        f.summary(doc.getPath(), queryString, settings.getInfoBefore(), settings.getInfoAfter());
+                    }
                 }
             }
             Date end2 = new Date();
@@ -168,19 +173,11 @@ public class MainIndex {
         }
     }
 
-    private String prefix(boolean prefix) {
-        if (prefix) {
-            return "file://";
-        } else {
-            return "";
-        }
-    }
-
     public synchronized void clickedHrefTo(String absolutePath) {
         try {
             if (absolutePath.toLowerCase().endsWith(".html") && hc.size() > 0) {
-                hc.addLink(absolutePath, new File(absolutePath).toPath(), true);
-                hc.saveHrefs();
+                hc.addLink(absolutePath, new URL(absolutePath), true);
+                hc.saveCustom();
             }
         } catch (Exception ex) {
             ex.printStackTrace();

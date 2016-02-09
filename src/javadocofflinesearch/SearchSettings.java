@@ -18,8 +18,6 @@ public interface SearchSettings {
 
     public boolean isPage();
 
-    public boolean isFileForced();
-
     public boolean isMergeWonted();
 
     public int getInfoBefore();
@@ -35,4 +33,6 @@ public interface SearchSettings {
     public int getstartAt();
 
     public int getRecords();
+
+    public boolean isOmitArchives();
 }

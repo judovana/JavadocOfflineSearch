@@ -13,10 +13,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javadocofflinesearch.tools.LevenshteinDistance;
 
 /**
  *
@@ -25,31 +27,53 @@ import java.util.Set;
 public class HrefCounter {
 
     private final Map<String, Integer> priorities = new HashMap<>();
-    private final File file;
+    private final Map<String, Integer> customClicks = new HashMap<>();
 
-    public File getFile() {
-        return file;
+    private final File file1;
+    private final File file2;
+
+    public File getFile1() {
+        return file1;
     }
 
-    public HrefCounter(File cache) {
-        this.file = new File(cache, "pageIndex");
+    public File getFile2() {
+        return file2;
+    }
+
+    public HrefCounter(File cache, File config) {
+        this.file1 = new File(cache, "pageIndex");
+        this.file2 = new File(config, "customClicks");
     }
 
     public void countPoints(String s) {
-        Integer i = priorities.get(s);
-        if (i == null) {
-            priorities.put(s, 1);
-        } else {
-            priorities.put(s, i + 1);
+        countPoints(s, 1, priorities);
+    }
+
+    public void customClick(String s) {
+        countPoints(s, 10, customClicks);
+    }
+
+    private static void countPoints(String s, int val, Map<String, Integer> where) {
+        if (s.length() > 2) {
+            Integer i = where.get(s);
+            if (i == null) {
+                where.put(s, val);
+            } else {
+                where.put(s, i + val);
+            }
         }
     }
 
     public void saveHrefs() throws IOException {
-        saveHrefs(file);
+        saveHrefs(file1, priorities);
     }
 
-    private void saveHrefs(File f) throws IOException {
-        Set<Map.Entry<String, Integer>> values = priorities.entrySet();
+    public void saveCustom() throws IOException {
+        saveHrefs(file2, customClicks);
+    }
+
+    private static void saveHrefs(File f, Map<String, Integer> where) throws IOException {
+        Set<Map.Entry<String, Integer>> values = where.entrySet();
         try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "UTF-8"))) {
             for (Map.Entry<String, Integer> value : values) {
                 br.write(value.getKey());
@@ -61,16 +85,16 @@ public class HrefCounter {
     }
 
     public void loadHrefs() throws IOException {
-        loadHrefs(file);
+        loadHrefs(file1, true, priorities);
+        loadHrefs(file2, true, customClicks);
     }
 
-    private void loadHrefs(File f) throws IOException {
-        loadHrefs(f, true);
-    }
-
-    private void loadHrefs(File f, boolean clear) throws IOException {
+    private static void loadHrefs(File f, boolean clear, Map<String, Integer> where) throws IOException {
+        if (!f.exists()) {
+            return;
+        }
         if (clear) {
-            priorities.clear();
+            where.clear();
         }
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
             while (true) {
@@ -79,48 +103,65 @@ public class HrefCounter {
                     return;
                 }
                 String[] ss = s.split("\\s+");
-                priorities.put(ss[0], Integer.valueOf(ss[1]));
+                where.put(ss[0], Integer.valueOf(ss[1]));
             }
         }
     }
 
     public Integer getPageIndex(String path) {
-        return priorities.get(path);
+        Integer p1 = priorities.get(path);
+        if (p1 == null) {
+            p1 = 0;
+        }
+        Integer p = customClicks.get(path);
+        if (p == null) {
+            p = 0;
+        }
+        return p1 + p;
     }
 
-    public void addLink(String s, Path current) {
+    public void addLink(String s, URL current) {
         addLink(s, current, false);
     }
 
-    public void addLink(String s, Path current, boolean differentPalnet) {
+    public void addLink(String s, URL current, boolean customClick) {
 
-        if (!s.contains("://")) {
-            int ii = s.lastIndexOf("?");
-            if (ii >= 0) {
-                s = s.substring(0, ii);
-            }
-            ii = s.lastIndexOf("#");
-            if (ii >= 0) {
-                s = s.substring(0, ii);
-            }
-            if (!s.isEmpty()) {
-                if (!differentPalnet) {
-                    if (s.startsWith("/")) {
-                        s = s.substring(1);
-                    }
-                    s = absolutizeLink(s, current.getParent()/*parent, as we need direcotry, not file*/);
+        int ii = s.lastIndexOf("?");
+        if (ii >= 0) {
+            s = s.substring(0, ii);
+        }
+        ii = s.lastIndexOf("#");
+        if (ii >= 0) {
+            s = s.substring(0, ii);
+        }
+        if (!s.isEmpty()) {
+            if (!customClick) {
+                if (s.startsWith("/")) {
+                    s = s.substring(1);
                 }
+                s = absolutizeLink(s, current);
             }
+        }
+        if (customClick) {
+            customClick(s);
+        } else {
             countPoints(s);
         }
     }
 
-    private static String absolutizeLink(String s, Path current) {
+    private static String absolutizeLink(String s, URL current) {
+        String parents = LevenshteinDistance.sanitizeFileUrl(current);
+        parents = getParent(parents);
         while (s.startsWith("../")) {
             s = s.substring(3);
-            current = current.getParent();
+            parents = getParent(parents);
         }
-        return current.toString() + "/" + s;
+        return parents + "/" + s;
+    }
+
+    private static String getParent(String parents) {
+        //lets prettend windows support
+        return parents.substring(0, Math.max(parents.lastIndexOf("/"), parents.lastIndexOf("\\")));
     }
 
     public boolean isEmpty() {

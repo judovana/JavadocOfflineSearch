@@ -37,17 +37,23 @@
 package javadocofflinesearch.server;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.StringTokenizer;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.lucene.MainIndex;
+import javadocofflinesearch.tools.LevenshteinDistance;
 
 /**
  * based on http://www.mcwalter.org/technology/java/httpd/tiny/index.html Very
@@ -118,49 +124,54 @@ public class TinyHttpdImpl extends Thread {
                     String contentType = "";
                     contentType += CRLF;
 
+                    String command = filePath.replaceAll("\\?.*", "");
+                    String query = filePath.replaceFirst(".*?\\?", "");
+
                     if (isGetRequest) {
-                        String potentionalFile = filePath.replaceAll("\\?.*", "");
-                        File resource = new File(potentionalFile);
-                        if (filePath.trim().length() > 1 && resource.exists()) {
-                            System.out.println("Returning file: " + resource.getAbsolutePath());
-                            //this is learning, more this hreff is clicked, more is recorded
-                            mainIndex.clickedHrefTo(resource.getAbsolutePath());
-                            int resourceLength = (int) resource.length();
-                            byte[] buff = new byte[resourceLength];
-                            try (FileInputStream fis = new FileInputStream(resource)) {
-                                fis.read(buff);
-                            }
-                            String lastModified = "Last-Modified: " + new Date(resource.lastModified()) + CRLF;
-                            writer.print(HTTP_OK + "Content-Length:" + resourceLength + CRLF + lastModified + contentType + CRLF);
-                            writer.write(buff, 0, resourceLength);
+                        if (filePath.trim().length() <= 1) {
+                            SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer);
+                            writer.print(HTTP_OK + contentType + CRLF);
+                            xr.haders();
+                            xr.tail();
 
                         } else {
-                            if (filePath.trim().length() <= 1) {
-                                SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer);
-                                writer.print(HTTP_OK + contentType + CRLF);
-                                xr.haders();
-                                xr.tail();
-
-                            } else {
-                                String command = filePath.replaceAll("\\?.*", "");
-                                String query = filePath.replaceFirst(".*?\\?", "");
-                                if (command.toLowerCase().equals("/search")) {
-                                    WebParams cmds = new WebParams(query);
-                                    writer.print(HTTP_OK + contentType + CRLF);
-                                    if (!mainIndex.checkInitialized()) {
-                                        cmds.createFormatter(writer).initializationFailed(mainIndex.printInitialized());
-                                    } else {
-
-                                        mainIndex.search(cmds.getQuery(), cmds, writer);
-                                    }
+                            String potentionalFile = URLDecoder.decode(command, "utf-8");
+                            InputStream decodingStream = null;
+                            URL l = null;
+                            try {
+                                if (potentionalFile.contains("!")) {
+                                    l = new URL("jar:file://" + potentionalFile);
                                 } else {
-                                    writer.print(HTTP_NOT_FOUND);
+                                    l = new URL("file://" + potentionalFile);
                                 }
+                                decodingStream = l.openStream();
+                            } catch (Exception ex) {
+                                //consuming, is check
                             }
-                        }
-                    } else {
-                        writer.print(HTTP_NOT_IMPLEMENTED + CRLF);
+                            if (decodingStream != null) {
+                                System.out.println("Returning file: " + potentionalFile);
+                                //this is learning, more this hreff is clicked, more is recorded
+                                mainIndex.clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
+                                byte[] buff = streamToBYteArray(decodingStream);
 
+                                String lastModified = "Last-Modified: " + new Date() + CRLF;
+                                writer.print(HTTP_OK + "Content-Length:" + buff.length + CRLF + lastModified + contentType + CRLF);
+                                writer.write(buff);
+
+                            } else if (command.toLowerCase().equals("/search")) {
+                                WebParams cmds = new WebParams(query);
+                                writer.print(HTTP_OK + contentType + CRLF);
+                                if (!mainIndex.checkInitialized()) {
+                                    cmds.createFormatter(writer).initializationFailed(mainIndex.printInitialized());
+                                } else {
+
+                                    mainIndex.search(cmds.getQuery(), cmds, writer);
+                                }
+                            } else {
+                                writer.print(HTTP_NOT_FOUND);
+                            }
+
+                        }
                     }
                 }
             } catch (SocketException e) {
@@ -178,4 +189,15 @@ public class TinyHttpdImpl extends Thread {
         }
     }
 
+    private static byte[] streamToBYteArray(InputStream is) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1024];
+        while ((nRead = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+
+        buffer.flush();
+        return buffer.toByteArray();
+    }
 }

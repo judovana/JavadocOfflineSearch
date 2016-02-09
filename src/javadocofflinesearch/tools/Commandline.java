@@ -5,7 +5,6 @@
  */
 package javadocofflinesearch.tools;
 
-import java.io.Console;
 import java.io.PrintStream;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.JavadocOfflineSearch;
@@ -41,7 +40,6 @@ public class Commandline implements SearchSettings {
     private static final String MORE_INFO = "more-info";
     private static final String QUERY = "query";
     private static final String START_SERVER = "start-server";
-    private static final String FILE = "force-file";
     private static final String MERGE_COMAPRATORS = "merge-results";
     private static final String EXTRACT_INFO = "exctract-info";
     private static final String OUTPUT_COLOUR = "color";
@@ -60,6 +58,8 @@ public class Commandline implements SearchSettings {
     private static final String START_AT = "start-at";
     private static final int showRecordsDefault = Integer.MAX_VALUE;
     private static final String RECORDS = "records";
+    private static final String ARCHIVES = "omit-archives";
+    private static final String PRINT_ENGINE = "print-engine";
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -70,7 +70,6 @@ public class Commandline implements SearchSettings {
         Option noinfo = new Option("n", NO_INFO, false, "will NOT show snippets of string usages under title and link");
         Option moreinfo = new Option("m", MORE_INFO, false, "will (default) show snippets of string usages under title and link");
         Option server = new Option("s", START_SERVER, false, "will start the server on port 31745. You can then search in browser by http://lcoalhost:" + JavadocOfflineSearch.PORT);
-        Option file = new Option("f", FILE, false, "will NOT prefix all files by file://");
         Option merge = new Option("g", MERGE_COMAPRATORS, false, "will use both lucene and page sorting to determine results");
         Option exInfo = new Option("x", EXTRACT_INFO, true, "from given document, extract those ...info...  based on query");
         Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + defaultBefore);
@@ -81,10 +80,12 @@ public class Commandline implements SearchSettings {
         Option recordsOpt = new Option("r", RECORDS, true, "show number of recods #number. Default  " + showRecordsDefault);
         Option outputColor = new Option("c", OUTPUT_COLOUR, false, "will use colored shell output (default in terminal)");
         Option outputHtml = new Option("t", OUTPUT_HTML, false, "will force html marked up output");
-        Option outputAjax = new Option("a", OUTPUT_AJAX, false, "will force html marked up with ajax info snippets");
+        Option outputAjax = new Option("a", OUTPUT_AJAX, false, "will force html marked up with ajax info snippets (not finished, and probably never will)");
         Option outputPlain = new Option("y", OUTPUT_PLAIN, false, "will use simple palintext output (default out of terminal)");
+        Option archives = new Option("z", ARCHIVES, false, "will ignore items from archvies from search results");
 
         Option search = new Option("q", QUERY, true, "is considered default when no argument is given. Search docs. '-' connected wth word is NOT.");
+        Option engine = new Option("e", PRINT_ENGINE, false, "will print out firefox's search engine to be used as firefox plugin");
 
         options = new Options();
         options.addOption(help);
@@ -96,7 +97,6 @@ public class Commandline implements SearchSettings {
         options.addOption(moreinfo);
         options.addOption(search);
         options.addOption(server);
-        options.addOption(file);
         options.addOption(merge);
         options.addOption(exInfo);
         options.addOption(outputColor);
@@ -109,6 +109,8 @@ public class Commandline implements SearchSettings {
         options.addOption(didCount);
         options.addOption(startAtOpt);
         options.addOption(recordsOpt);
+        options.addOption(archives);
+        options.addOption(engine);
         this.args = args;
 
     }
@@ -235,14 +237,14 @@ public class Commandline implements SearchSettings {
         return !hasNoInfo();
     }
 
-    @Override
-    public boolean isFileForced() {
-        return !line.hasOption(FILE);
-    }
-
+ 
     @Override
     public boolean isMergeWonted() {
         return line.hasOption(MERGE_COMAPRATORS);
+    }
+    @Override
+    public boolean isOmitArchives() {
+        return line.hasOption(ARCHIVES);
     }
 
     public boolean isColoured() {

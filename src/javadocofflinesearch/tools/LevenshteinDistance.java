@@ -1,12 +1,28 @@
 
 package javadocofflinesearch.tools;
 
+import java.net.URL;
+
 /**
  *
  * @author jvanek
  */
 public class LevenshteinDistance {
 
+    
+    public static String sanitizeFileUrl(URL url){
+        return sanitizeFileUrl(url.toExternalForm());
+    }
+    public static String sanitizeFileUrl(String url){
+        if (url.contains("file:///")){
+            return url;
+        }else
+        if (url.contains("file://")){
+            return url;
+        } else{
+            return url.replaceFirst(":/", ":///");
+        }
+    }
     public static int levenshteinDistance(CharSequence lhs, CharSequence rhs) {
         int len0 = lhs.length() + 1;
         int len1 = rhs.length() + 1;

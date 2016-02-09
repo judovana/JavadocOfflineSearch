@@ -5,13 +5,18 @@ import javadocofflinesearch.htmlprocessing.XmledHtmlToText;
 import javadocofflinesearch.tools.TitledByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import javadocofflinesearch.tools.LevenshteinDistance;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -78,7 +83,6 @@ public class SingleIndexer implements Runnable {
             if (path1.isDirectory()) {
                 indexDocs(writer, path1.listFiles());
             } else {
-                String name = path1.getName().toLowerCase();
                 if (!setup.isSuffixCaseInsensitiveIncluded(path1.getName())) {
                     System.out.println("Skipped (non indexable)" + path1);
                     continue;
@@ -92,7 +96,13 @@ public class SingleIndexer implements Runnable {
                     System.out.println("Skipped " + path1);
                     continue;
                 }
-                indexDoc(writer, path1);
+                String name = path1.getName().toLowerCase();
+                if (name.endsWith(".zip") || name.endsWith(".jar")) {
+                    indexZip(writer, path1);
+                } else {
+                    indexDoc(writer, path1);
+                }
+
             }
         }
     }
@@ -100,9 +110,9 @@ public class SingleIndexer implements Runnable {
     /**
      * Indexes a single document
      */
-    private void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
+    private void indexDoc(IndexWriter writer, URL file) throws IOException {
         files++;
-        try (InputStream stream = htmlizer.parseAnother(MalformedXmlParser.xmlizeInputStream(Files.newInputStream(file)), file)) {
+        try (InputStream stream = htmlizer.parseAnother(MalformedXmlParser.xmlizeInputStream(file.openStream()), file)) {
             // make a new, empty document
             Document doc = new Document();
 
@@ -110,7 +120,7 @@ public class SingleIndexer implements Runnable {
             // field that is indexed (i.e. searchable), but don't tokenize 
             // the field into separate words and don't index term frequency
             // or positional information:
-            Field pathField = new StringField("path", file.toString(), Field.Store.YES);
+            Field pathField = new StringField("path", LevenshteinDistance.sanitizeFileUrl(file.toExternalForm()), Field.Store.YES);
             doc.add(pathField);
 
             // Add the last modified date of the file a field named "modified".
@@ -130,7 +140,7 @@ public class SingleIndexer implements Runnable {
             // If that's not the case searching for special characters will fail.
             doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
 
-            if (!(setup.isFilenameCaseInsensitiveIncluded(file.toFile().getName()) && setup.isPathCaseInsensitiveIncluded(file.toFile()))) {
+            if (!(setup.isFilenameCaseInsensitiveIncluded(new File(file.getFile()).getName()) && setup.isPathCaseInsensitiveIncluded(new File(file.getFile())))) {
                 System.out.println("Processed, but NOT added: " + file);
                 return;
             }
@@ -149,6 +159,21 @@ public class SingleIndexer implements Runnable {
     }
 
     private void indexDoc(IndexWriter writer, File path1) throws IOException {
-        indexDoc(writer, path1.toPath(), Files.getLastModifiedTime(path1.toPath()).toMillis());
+        indexDoc(writer, path1.toURI().toURL());
+    }
+
+    private void indexZip(IndexWriter writer, File path1) throws IOException {
+        ZipInputStream stream = new ZipInputStream(new FileInputStream(path1));
+        URL zipUrl = path1.toURI().toURL();
+        try {
+            ZipEntry entry;
+            while ((entry = stream.getNextEntry()) != null) {
+                URL entryUrl = new URL("jar:" + LevenshteinDistance.sanitizeFileUrl(zipUrl) + "!/" + entry.getName());
+                indexDoc(writer, entryUrl);
+            }
+        } finally {
+            // we must always close the zip file.
+            stream.close();
+        }
     }
 }

@@ -5,9 +5,8 @@
  */
 package javadocofflinesearch.lucene;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,9 +23,8 @@ import org.xml.sax.SAXException;
  */
 public class InfoExtractor {
 
-    
-    public static String extract(String file, String queryString, Formatter f, int lShift, int rShift) throws IOException, SAXException, ParserConfigurationException {
-        String s = new XmledHtmlToText(null, null).parseAnotherII(MalformedXmlParser.xmlizeInputStream(Files.newInputStream(new File(file).toPath())), null, false)[1];
+    public static String extract(String url, String queryString, Formatter f, int lShift, int rShift) throws IOException, SAXException, ParserConfigurationException {
+        String s = new XmledHtmlToText(null, null).parseAnotherII(MalformedXmlParser.xmlizeInputStream(new URL(url).openStream()), null, false)[1];
         s = s.replaceAll("<!--.*?-->", "");//?
         Pattern p = Pattern.compile("(?i)" + queryString.trim().replaceAll("\\s+", "|"));
         Matcher m = p.matcher(s);
@@ -40,6 +38,9 @@ public class InfoExtractor {
             if (start < 0) {
                 lShift = lShift - start;
                 start = 0;
+            }
+            if (stop >= s.length()) {
+                stop = s.length() - 1;
             }
             try {
                 StringBuilder target = new StringBuilder(s.substring(start, stop));
