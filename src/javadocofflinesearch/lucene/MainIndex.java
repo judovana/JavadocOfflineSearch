@@ -42,14 +42,12 @@ public class MainIndex {
     private final Vocabulary vocabualry;
     private final HrefCounter hc;
     private final File INDEX;
-    private final Setup setup;
 
-    public MainIndex(File cache, File config, Setup setup) throws IOException {
+    public MainIndex(File cache, File config) throws IOException {
         INDEX = new File(cache, "javadocIndex.index");
         this.hc = new HrefCounter(cache, config);
         this.vocabualry = new Vocabulary(cache);
         this.htmlizer = new XmledHtmlToText(hc, vocabualry);
-        this.setup = setup;
     }
 
     public boolean checkInitialized() throws IOException {
@@ -74,12 +72,12 @@ public class MainIndex {
         s += hc.getFile1().getAbsolutePath() + " records: " + hc.size() + "\n";
         s += vocabualry.getFile().getAbsolutePath() + " records: " + vocabualry.size() + "\n";
         s += "Your may also check content of:\n";
-        s += setup.getMAIN_CONFIG().getAbsolutePath() + "\n";
+        s += Setup.getSetup().getMAIN_CONFIG().getAbsolutePath() + "\n";
         return s;
     }
 
     public void index() throws IOException {
-        index(setup.getDirs());
+        index(Setup.getSetup().getDirs());
     }
 
     private void index(Path... sources) throws IOException {
@@ -89,7 +87,7 @@ public class MainIndex {
         //iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         try (IndexWriter writer = new IndexWriter(index, iwc)) {
-            SingleIndexer si = new SingleIndexer(writer, htmlizer, setup);
+            SingleIndexer si = new SingleIndexer(writer, htmlizer);
             si.run();
         }
     }

@@ -1,9 +1,7 @@
-<!--copy this file somewhere like "$USER_HOME/.mozilla/firefox/YOUR_PROFILE.default/searchplugins-->
-<SearchPlugin xmlns="http://www.mozilla.org/2006/browser/search/" xmlns:os="http://a9.com/-/spec/opensearch/1.1/">
-    <os:ShortName>Javadoc offline search</os:ShortName>
-    <os:Description>Quick search in your indexed documets. Run 'java -jar JavadocOfflineSearch.jar  -start-server' to start server.</os:Description>
-    <os:InputEncoding>UTF-8</os:InputEncoding>
-    <os:Image width="16" height="16">data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAABxcYQA+fn5AOvr6wChoaMATU1UAM/PzQABAY4AAQGvAAAA2AABAWIACgopAAAAygAAAMwAAAAAAP///wAAAAAA7u7u7u4e7u7u7u7u7jXu7u7u7u7uLT7u7u7u4dDjpETuIu7uVeWt3VPR5UQABK3drVE0l3d3dq3aMHu4zMzIetpsyIu7u7vJp8iHaby7zIm8h5rZvLu3ari5qWjLuGrdqZm4jLvMnd3d27qWzIet3d3Ztnu2tt3a3dp4y5qa3a0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</os:Image>
-    <os:Url type="text/html" method="GET" template="http://localhost:31754/search?query={searchTerms}" resultDomain="bugzilla.redhat.com">
-    </os:Url>
+<!--copy this file somewhere like "$USER_HOME/.mozilla/firefox/YOUR_PROFILE.default/searchplugins--><SearchPlugin xmlns="http://www.mozilla.org/2006/browser/search/" xmlns:os="http://a9.com/-/spec/opensearch/1.1/">    
+    <os:ShortName>Javadoc offline search</os:ShortName>    
+    <os:Description>Quick search in your indexed documets. Run 'java -jar JavadocOfflineSearch.jar  -start-server' to start server.</os:Description>    
+    <os:InputEncoding>UTF-8</os:InputEncoding>    
+    <os:Image width="16" height="16">data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QALgBZANf8aHhSAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AIJEjcOtUVX5QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAACp0lEQVQ4y1WTT2xUVRTGf+f0YWGcV2o7Q/uqxSYShcTXdGZBmhhN3LHCEjQkTYzsFCuJiogUjbKBBTBloSXSDWUHtQ0FFhptWZnQRO2irmpCrbV9bUiMOq/2z8y7l8WdzuBZ3PPlu+fPvfe7R2g+9JD6TIm2Yw8BUMAAgiBYbGXdsi12odDKtkxJSe2Owy+HgrA/3wnxBibegOIGJl4LP8l3hqfzIRTX4d917D9r4el8GPbnO/FSq6zN1kHu1r1wDEvX2GQ4hiU/OknXqMO5kQlyIxMO3/xhy1dx143vlWS5CIBZjme+GLwTfnr4VcyK48rLMclKXMVbvrwcz3x++RbJUuyRLK4CkCzGJNbddfNPF5wsxZjEceWF4v+8sRZFlNK8I0p/xOG5c70zp3qvYn53BUoPiiTzlc5zNb85F4fnL75J6UFR6OguhIX7HwDMnNhfAANla1EIB34+4fjcJYy1IBIOTDvu/RcvOFHaUmfdkSoSKmAMYGrSmXIVKwajTmsFvD3Bf/UAd6eD9wBey0dfoTD+U9BX1R14vTsa/OZ+8C6P2ZGXoiveC+34hbvB0Y96omEEbo8Hx08eiq7JL+jHPdEwgCo8X4cvU8iZN6LrGJA6ZC/43rNtpEXRjqdJq0VUkecCfFXk4u3gKMCVd6JRFFSR86PBWwBf90VjCHi7W1xwezM+CqJIkCEtioz3R99Sh7SDj7i9O59F3wHyDKStIl5bE74o0pLFF7CiSNDsuNZMJRGwgogiLc34WnsG8XY14v92NZp++e3gFYDZoWg6Cw2qSPYpfAEsrogqkt3pOFHEWqzM//rhYvzXj+urf0+tq9Pp8RzXRmpYK9jPHEhtT+97wmts6mzYUV/eXm+mVqsDC7YytrVkrX0RFSTlN+7wWw8++QiENQ/ozUk1uAAAAABJRU5ErkJggg==</os:Image>    
+    <os:Url type="text/html" method="GET" template="http://localhost:31754/search?query={searchTerms}" resultDomain="bugzilla.redhat.com">    </os:Url>
 </SearchPlugin>

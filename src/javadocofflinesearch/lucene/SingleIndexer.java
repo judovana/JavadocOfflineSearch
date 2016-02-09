@@ -11,12 +11,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javadocofflinesearch.tools.LevenshteinDistance;
+import javadocofflinesearch.tools.Setup;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -32,13 +32,11 @@ import org.apache.lucene.index.Term;
 public class SingleIndexer implements Runnable {
 
     private final IndexWriter writer;
-    private final IndexerSettings setup;
     private final XmledHtmlToText htmlizer;
     private int files = 0;
 
-    SingleIndexer(IndexWriter writer, XmledHtmlToText htmlizer, IndexerSettings setup) {
+    SingleIndexer(IndexWriter writer, XmledHtmlToText htmlizer) {
         this.writer = writer;
-        this.setup = setup;
         this.htmlizer = htmlizer;
     }
 
@@ -46,7 +44,7 @@ public class SingleIndexer implements Runnable {
     public void run() {
         Date start = new Date();
         try {
-            Path[] sources = setup.getDirs();
+            Path[] sources = Setup.getSetup().getDirs();
             indexDocs(writer, sources);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -83,16 +81,16 @@ public class SingleIndexer implements Runnable {
             if (path1.isDirectory()) {
                 indexDocs(writer, path1.listFiles());
             } else {
-                if (!setup.isSuffixCaseInsensitiveIncluded(path1.getName())) {
+                if (!Setup.getSetup().isSuffixCaseInsensitiveIncluded(path1.getName())) {
                     System.out.println("Skipped (non indexable)" + path1);
                     continue;
                 }
                 //other may be included at least in vocebularry or pageindex
-                if (!setup.isFilenameCaseInsensitiveIncluded(path1.getName()) && !setup.isExcldedFileIncludedInRanks()) {
+                if (!Setup.getSetup().isFilenameCaseInsensitiveIncluded(path1.getName()) && !Setup.getSetup().isExcldedFileIncludedInRanks()) {
                     System.out.println("Skipped " + path1);
                     continue;
                 }
-                if (!setup.isPathCaseInsensitiveIncluded(path1) && !setup.isExcldedFileIncludedInRanks()) {
+                if (!Setup.getSetup().isPathCaseInsensitiveIncluded(path1) && !Setup.getSetup().isExcldedFileIncludedInRanks()) {
                     System.out.println("Skipped " + path1);
                     continue;
                 }
@@ -140,7 +138,7 @@ public class SingleIndexer implements Runnable {
             // If that's not the case searching for special characters will fail.
             doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
 
-            if (!(setup.isFilenameCaseInsensitiveIncluded(new File(file.getFile()).getName()) && setup.isPathCaseInsensitiveIncluded(new File(file.getFile())))) {
+            if (!(Setup.getSetup().isFilenameCaseInsensitiveIncluded(new File(file.getFile()).getName()) && Setup.getSetup().isPathCaseInsensitiveIncluded(new File(file.getFile())))) {
                 System.out.println("Processed, but NOT added: " + file);
                 return;
             }

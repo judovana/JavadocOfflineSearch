@@ -37,16 +37,56 @@ public class Setup implements IndexerSettings {
     private final File MAIN_CONFIG;
     Properties p = new Properties();
 
+    public void preload() throws IOException {
+        loadImpl();
+    }
+
+    private static class SetupHolder {
+
+        private static Setup INSTANCE;
+
+        public static Setup create(File configDir) {
+            INSTANCE = new Setup(configDir);
+            return INSTANCE;
+        }
+
+        public static Setup getInstance() {
+            return INSTANCE;
+        }
+    }
+    
+    public static Setup getSetup(){
+        return SetupHolder.getInstance();
+    }
+    
+    public static Setup createSetup(File congifDir){
+        return SetupHolder.create(congifDir);
+    }
+
     public File getMAIN_CONFIG() {
         return MAIN_CONFIG;
     }
 
-    public Setup(File CONFIG) {
+    private Setup(File CONFIG) {
         MAIN_CONFIG = new File(CONFIG, "javadocOfflineSearch.properties");
         p.setProperty(DIRS, VALUE);
     }
 
-    public void load() throws IOException {
+    private boolean loaded = false;
+
+    private void load() {
+        try {
+            loadImpl();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void loadImpl() throws IOException {
+        if (loaded) {
+            return;
+        }
+        loaded = true;
         if (MAIN_CONFIG.exists()) {
             p.load(new InputStreamReader(new FileInputStream(MAIN_CONFIG)));
         } else {
@@ -62,26 +102,31 @@ public class Setup implements IndexerSettings {
     }
 
     private String[] getDirsString() {
+        load();
         String[] dirs = p.getProperty(DIRS).split(SEMICOLON);
         return dirs;
     }
 
     private String[] getNLE() {
+        load();
         String[] ignredNames = p.getProperty(NLE).split(SEMICOLON);
         return ignredNames;
     }
 
     private String[] getSuffixes() {
+        load();
         String[] ignredSuffs = p.getProperty(SUFFIXES).split(SEMICOLON);
         return ignredSuffs;
     }
 
     private String[] getPLC() {
+        load();
         String[] ignredPaths = p.getProperty(PLC).split(SEMICOLON);
         return ignredPaths;
     }
 
     private Boolean getInclude1() {
+        load();
         Boolean val = Boolean.valueOf(p.getProperty(INCLUDE));
         return val;
     }

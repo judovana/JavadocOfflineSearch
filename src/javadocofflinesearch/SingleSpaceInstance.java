@@ -22,21 +22,20 @@ public class SingleSpaceInstance {
 
     private final File cache;
     private final Commandline cmds;
-    private final Setup setup;
     private final File config;
 
     SingleSpaceInstance(File CONFIG, File CACHE, Commandline cmds) {
         cache = CACHE;
         config = CONFIG;
-        setup = new Setup(CONFIG);
+        Setup.createSetup(CONFIG);
         this.cmds = cmds;
     }
 
     void run() {
         try {
-            setup.load();
+            Setup.getSetup().preload();
             if (cmds.hasServer()) {
-                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT, setup, cache, config);
+                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT,  cache, config);
                 Thread r = new Thread(lServerLuncher);
                 r.setDaemon(true);
                 r.start();
@@ -48,7 +47,7 @@ public class SingleSpaceInstance {
             } else if (cmds.hasPrintFirefoxEngine()) {
                 printFirefox();
             } else {
-                MainIndex mainIndex = new MainIndex(cache, config, setup);
+                MainIndex mainIndex = new MainIndex(cache, config);
                 if (cmds.hasIndex()) {
                     mainIndex.index();
                     installFirefox();

@@ -57,16 +57,15 @@ public class ServerLauncher implements Runnable {
     private boolean running;
     private final Integer port;
     private ServerSocket serverSocket;
-    private final Setup setup;
     private final File cache;
     private final File config;
 
-    public ServerLauncher(int port, Setup setup, File cache, File config) {
-        this.setup = setup;
+    public ServerLauncher(int port, File cache, File config) {
         this.cache = cache;
         this.config = config;
         this.port = port;
         System.err.println("http://localhost:" + port);
+        System.out.println("http://localhost:" + port);
     }
 
     public boolean isRunning() {
@@ -80,7 +79,7 @@ public class ServerLauncher implements Runnable {
     public void run() {
         running = true;
         try {
-            MainIndex mainIndex = new MainIndex(cache, config, setup);
+            MainIndex mainIndex = new MainIndex(cache, config);
             serverSocket = new ServerSocket(port);
             while (running) {
                 TinyHttpdImpl server = new TinyHttpdImpl(serverSocket.accept(), false, mainIndex);
