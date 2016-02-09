@@ -175,6 +175,17 @@ public class Commandline implements SearchSettings {
         }
     }
 
+    public void verifyFirefox() {
+        if (line.hasOption(PRINT_ENGINE) && args.length != 1) {
+            System.out.println(PRINT_ENGINE + " must be lone item.");
+            System.exit(1);
+        }
+    }
+
+    public boolean hasPrintFirefoxEngine() {
+        return line.hasOption(PRINT_ENGINE);
+    }
+
     public boolean hasServer() {
         return (line.hasOption(START_SERVER));
     }
@@ -237,11 +248,11 @@ public class Commandline implements SearchSettings {
         return !hasNoInfo();
     }
 
- 
     @Override
     public boolean isMergeWonted() {
         return line.hasOption(MERGE_COMAPRATORS);
     }
+
     @Override
     public boolean isOmitArchives() {
         return line.hasOption(ARCHIVES);
@@ -331,7 +342,8 @@ public class Commandline implements SearchSettings {
         cmds.checkVersion();
         cmds.verifyIndex();
         cmds.verifyServer();
-        if (!(hasIndex() || hasServer())) {
+        cmds.verifyFirefox();
+        if (!(hasIndex() || hasServer() || hasPrintFirefoxEngine())) {
             cmds.checkDupes();
             cmds.verifyQeury();
             cmds.checkFormatters();

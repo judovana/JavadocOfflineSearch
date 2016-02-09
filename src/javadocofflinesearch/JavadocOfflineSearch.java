@@ -13,6 +13,7 @@ public class JavadocOfflineSearch {
 
     private static final File CONFIG_HOME;
     private static final File CACHE_HOME;
+    public static final File FIREFOX_HOME=new File(System.getProperty("user.home")+"/.mozilla/firefox/");
     private static final File CONFIG;
     private static final File CACHE;
     public static final int PORT = 31754;
