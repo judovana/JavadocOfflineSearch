@@ -37,6 +37,26 @@ public class Setup implements IndexerSettings {
     private final File MAIN_CONFIG;
     Properties p = new Properties();
 
+    public static final String SECURITY = "security";
+    private boolean security = true;
+
+    private static final String DEF_OW_showBefore = "overwrite.showBefore";
+    private Integer showBefor = -40;
+
+    private static final String DEF_OW_showAfter = "overwrite.showAfter";
+    private Integer showAfter = 40;
+
+    private static final String DEF_OW_deadine = "overwrite.deadline";
+    private Integer deadline = 10;
+
+    private static final String DEF_OW_sugcount = "overwrite.count";
+    private Integer count = 10;
+
+    private static final String DEF_OW_perpage = "overwrite.perpage";
+    private Integer perpage = Integer.MAX_VALUE;
+    
+        
+
     public void preload() throws IOException {
         loadImpl();
     }
@@ -54,12 +74,12 @@ public class Setup implements IndexerSettings {
             return INSTANCE;
         }
     }
-    
-    public static Setup getSetup(){
+
+    public static Setup getSetup() {
         return SetupHolder.getInstance();
     }
-    
-    public static Setup createSetup(File congifDir){
+
+    public static Setup createSetup(File congifDir) {
         return SetupHolder.create(congifDir);
     }
 

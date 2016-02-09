@@ -273,9 +273,9 @@ public class Commandline implements SearchSettings {
     @Override
     public int getInfoBefore() {
         if (line.hasOption(INFO_BEFORE)) {
-            return -Integer.valueOf(line.getOptionValue(INFO_BEFORE));
+            return -Math.abs(Integer.valueOf(line.getOptionValue(INFO_BEFORE)));
         } else {
-            return -defaultBefore;
+            return -Math.abs(defaultBefore);
         }
     }
 
