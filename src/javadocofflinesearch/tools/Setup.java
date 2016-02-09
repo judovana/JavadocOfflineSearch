@@ -55,7 +55,14 @@ public class Setup implements IndexerSettings {
     private static final String DEF_OW_perpage = "overwrite.perpage";
     private Integer perpage = Integer.MAX_VALUE;
     
-        
+    //how much MATCHES will InfoExtractor  READ
+    private static final String DEF_OW_previewMaxLoad = "overwrite.previewMaxLoad";
+    private Integer previewMaxLoad = 30;
+    
+    //how much MATCHES will InfoExtractor  SHOW
+    private static final String DEF_OW_previewMaxShow = "overwrite.previewMaxShow";
+    private Integer previewMaxShow = 15;
+    
 
     public void preload() throws IOException {
         loadImpl();
