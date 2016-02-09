@@ -6,7 +6,6 @@ import javadocofflinesearch.tools.TitledByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import javadocofflinesearch.extensions.HrefCounter;
 import javadocofflinesearch.tools.LevenshteinDistance;
 import javax.xml.parsers.DocumentBuilder;

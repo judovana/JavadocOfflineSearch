@@ -19,20 +19,19 @@ import javadocofflinesearch.tools.Commandline;
 public class WebParams implements SearchSettings {
 
     private String query;
-    
+
     private boolean lucene = false;
     private boolean merge = false;
     private boolean noInfo = false;
-    
+
     private final String origQuery;
-    
+
     private Integer infoBefore;
     private Integer infoAfter;
-    
+
     private Integer ddmDeadline;
     private Integer ddmCount;
-    
-    
+
     private Integer startAt;
     private Integer records;
 
@@ -45,52 +44,52 @@ public class WebParams implements SearchSettings {
             if (pair.length != 2) {
                 System.err.println("Invalid query for " + item);
             } else {
-                if (pair[0].equalsIgnoreCase("query")) {
+                if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.query)) {
                     this.query = decode(pair[1]);
-                } else if (pair[0].equalsIgnoreCase("search-type")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.searchType)) {
                     if (pair[1].equalsIgnoreCase("lucene-index")) {
                         lucene = true;
                     }
-                } else if (pair[0].equalsIgnoreCase("merge")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.merge)) {
                     if (pair[1].equalsIgnoreCase("true")) {
                         merge = true;
                     }
-                } else if (pair[0].equalsIgnoreCase("no-info")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.noInfo)) {
                     if (pair[1].equalsIgnoreCase("true")) {
                         noInfo = true;
                     }
                 }//now less usefull stuff 
-                else if (pair[0].equalsIgnoreCase("infoBefore")) {
+                else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.infoBefore)) {
                     if (pair[1].trim().length() > 0) {
                         infoBefore = Integer.valueOf(pair[1].trim());
                     } else {
                         infoBefore = null;
                     }
-                } else if (pair[0].equalsIgnoreCase("infoAfter")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.infoAfter)) {
                     if (pair[1].trim().length() > 0) {
                         infoAfter = Integer.valueOf(pair[1].trim());
                     } else {
                         infoAfter = null;
                     }
-                }else if (pair[0].equalsIgnoreCase("ddmDeadline")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.ddmDeadline)) {
                     if (pair[1].trim().length() > 0) {
                         ddmDeadline = Integer.valueOf(pair[1].trim());
                     } else {
                         ddmDeadline = null;
                     }
-                } else if (pair[0].equalsIgnoreCase("ddmCount")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.ddmCount)) {
                     if (pair[1].trim().length() > 0) {
                         ddmCount = Integer.valueOf(pair[1].trim());
                     } else {
                         ddmCount = null;
                     }
-                }else if (pair[0].equalsIgnoreCase("startAt")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.startAt)) {
                     if (pair[1].trim().length() > 0) {
                         startAt = Integer.valueOf(pair[1].trim());
                     } else {
                         startAt = null;
                     }
-                } else if (pair[0].equalsIgnoreCase("records")) {
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.records)) {
                     if (pair[1].trim().length() > 0) {
                         records = Integer.valueOf(pair[1].trim());
                     } else {
@@ -142,9 +141,9 @@ public class WebParams implements SearchSettings {
     @Override
     public int getInfoBefore() {
         if (infoBefore == null) {
-            return -Commandline.defaultBefore;
+            return -Math.abs(Commandline.defaultBefore);
         } else {
-            return -infoBefore;
+            return -Math.abs(infoBefore);
         }
     }
 
@@ -187,7 +186,7 @@ public class WebParams implements SearchSettings {
     @Override
     public int getRecords() {
         if (records == null) {
-        return Integer.MAX_VALUE;
+            return Integer.MAX_VALUE;
         } else {
             return records;
         }

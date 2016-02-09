@@ -2,6 +2,7 @@
 
 The goal of this project was to make searching in your (java)docs as easy and comfortable as when you are browsing them online.
 So main access to them is cia comfort of your browser on  http://localhost:31754
+And of course it have also commandline interface server-free, but not os powerfull server-based  one (You never needed javadoc in headless system? Yaaah.. lucky one :) ).
 
  * java -jar JavadocOfflineSearch.jar  -h
  * java -jar JavadocOfflineSearch.jar  -index

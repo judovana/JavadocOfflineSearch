@@ -38,8 +38,6 @@ package javadocofflinesearch.server;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -150,6 +148,16 @@ public class TinyHttpdImpl extends Thread {
                             }
                             if (decodingStream != null) {
                                 System.out.println("Returning file: " + potentionalFile);
+                                if (potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm")) {
+                                    contentType = "Content-Type: ";
+                                    contentType += "text/html";
+                                    contentType += CRLF;
+                                }
+                                if (potentionalFile.toLowerCase().endsWith(".css")) {
+                                    contentType = "Content-Type: ";
+                                    contentType += "text/css";
+                                    contentType += CRLF;
+                                }
                                 //this is learning, more this hreff is clicked, more is recorded
                                 mainIndex.clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
                                 byte[] buff = streamToBYteArray(decodingStream);
@@ -160,6 +168,9 @@ public class TinyHttpdImpl extends Thread {
 
                             } else if (command.toLowerCase().equals("/search")) {
                                 WebParams cmds = new WebParams(query);
+                                contentType = "Content-Type: ";
+                                contentType += "text/html";
+                                contentType += CRLF;
                                 writer.print(HTTP_OK + contentType + CRLF);
                                 if (!mainIndex.checkInitialized()) {
                                     cmds.createFormatter(writer).initializationFailed(mainIndex.printInitialized());
