@@ -162,4 +162,9 @@ public class ColoredPlainTextFormatter implements Formatter {
         out.println(s);
         out.print(reset(true));
     }
+
+    @Override
+    public void pages(int from, int to, int total) {
+        
+    }
 }

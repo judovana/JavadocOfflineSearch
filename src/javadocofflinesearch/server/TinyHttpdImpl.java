@@ -69,6 +69,7 @@ public class TinyHttpdImpl extends Thread {
     private static final String HTTP_OK = "HTTP/1.0 " + HttpURLConnection.HTTP_OK + " OK" + CRLF;
 
     boolean canRun = true;
+    private static long requests = 0;
 
     private Socket socket;
     private MainIndex mainIndex;
@@ -88,6 +89,7 @@ public class TinyHttpdImpl extends Thread {
     @Override
     public void run() {
         try {
+            requests++;
             BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             PrintStream writer = new PrintStream(this.socket.getOutputStream());
             try {
@@ -192,6 +194,7 @@ public class TinyHttpdImpl extends Thread {
                 e.printStackTrace(writer);
                 e.printStackTrace();
             } finally {
+                System.out.println("Request done - " + requests);
                 reader.close();
                 writer.close();
             }

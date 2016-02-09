@@ -36,4 +36,6 @@ public interface Formatter {
 
     public void resultsIn(String title, long l, String unit);
     
+    public void pages(int from, int to, int total);
+    
 }

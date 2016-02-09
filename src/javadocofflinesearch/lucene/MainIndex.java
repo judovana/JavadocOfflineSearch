@@ -152,6 +152,7 @@ public class MainIndex {
             }
             int from = Math.max(0, settings.getstartAt());
             int to = Math.min(wrapped.length - 1, settings.getstartAt() + settings.getRecords());
+            f.pages(from, to, wrapped.length);
             for (int i = from; i <= to; i++) {
                 PagedScoreDocs doc = wrapped[i];
                 if (settings.isOmitArchives() && doc.getPath().startsWith("jar")) {
@@ -164,6 +165,7 @@ public class MainIndex {
                     }
                 }
             }
+            f.pages(from, to, wrapped.length);
             Date end2 = new Date();
             f.resultsIn("Results in:", (end2.getTime() - start.getTime()), "ms");
             f.tail();

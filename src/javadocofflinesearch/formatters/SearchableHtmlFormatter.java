@@ -29,6 +29,9 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     public static final String ddmCount = "ddmCount";
     public static final String startAt = "startAt";
     public static final String records = "records";
+    
+    //special field to reset item to start form when clicekd via "pages link"
+    public static final String bypage = "bypage";
 
     public SearchableHtmlFormatter(PrintStream out) {
         super(out);
@@ -47,6 +50,28 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
             //appearently ! in middle is enugh :)
         }
         out.println("<big><b><a href='" + href + "'>" + url + "</a>: </b></big>" + page + "/" + score + "<br/>");
+    }
+
+    @Override
+    public void pages(int from, int to, int total) {
+        int recordsPerPage = defaults.getRecords();
+        if (recordsPerPage == 0) {
+            return;
+        }
+        if (recordsPerPage < total) {
+            out.println("<br/>");
+            String s = defaults.getOrigQuery();
+            int pages = (total / recordsPerPage) + 1;
+            for (int i = 0; i < pages; i++) {
+                String nwq = "search?" + s.replaceAll(startAt + "=\\d*", startAt + "=" + (i * (defaults.getRecords())))+"&"+bypage+"=true";
+                if (i * (defaults.getRecords()) == from) {
+                     out.println("<b> " + (i + 1) + " </b>");
+                } else {
+                    out.println("<a href='" + nwq + "' > " + (i + 1) + " </a>");
+                }
+            }
+            out.println("<br/>");
+        }
     }
 
     @Override
@@ -70,7 +95,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("  <input type=\"checkbox\" name=\"" + noInfo + "\" value=\"true\" " + getWasInfoSelcted() + "/> hide text-out info<br/>");
         out.println("  <input type=\"text\"  id='t2' name=\"" + infoBefore + "\" value=\"" + wasInfoB() + "\"/> how much text to show before highlighted info<br/>");
         out.println("  <input type=\"text\"  id='t3' name=\"" + infoAfter + "\" value=\"" + wasInfoA() + "\"/> how much text to show after highlighted info<br/>");
-        out.println("  <input type=\"text\"  id='t4' name=\"" + ddmDeadline + "\" value=\"" + wasDDD() + "\"/> ehn total-found is bigger then this number, `do you mean ` do not appear<br/>");
+        out.println("  <input type=\"text\"  id='t4' name=\"" + ddmDeadline + "\" value=\"" + wasDDD() + "\"/>if total-found is bigger then this number, `do you mean ` do not appear<br/>");
         out.println("  <input type=\"text\"  id='t5' name=\"" + ddmCount + "\" value=\"" + wasDDC() + "\"/> number of suggested typo-fixing items<br/>");
         out.println("  <input type=\"text\"  id='t6' name=\"" + startAt + "\" value=\"" + wasStartAt() + "\"/> item to start showing on<br/>");
         out.println("  <input type=\"text\"  id='t7' name=\"" + records + "\" value=\"" + wasRecords() + "\"/> items per page<br/>");
@@ -146,9 +171,10 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         }
         return "";
     }
+
     private String wasStartAt() {
-        if (defaults != null) {
-            return defaults.getstartAt()+ "";
+        if (defaults != null && !defaults.isWasFromPage()) {
+            return defaults.getstartAt() + "";
         }
         return "";
     }

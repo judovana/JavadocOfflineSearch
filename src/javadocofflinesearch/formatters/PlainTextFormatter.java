@@ -103,4 +103,9 @@ public class PlainTextFormatter implements Formatter {
         out.println(title + " " + l + unit);
     }
 
+    @Override
+    public void pages(int from, int to, int total) {
+        
+    }
+
 }

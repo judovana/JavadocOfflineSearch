@@ -24,6 +24,8 @@ public class WebParams implements SearchSettings {
     private boolean merge = false;
     private boolean noInfo = false;
 
+    private boolean wasFromPage = false;
+
     private final String origQuery;
 
     private Integer infoBefore;
@@ -34,6 +36,10 @@ public class WebParams implements SearchSettings {
 
     private Integer startAt;
     private Integer records;
+
+    public String getOrigQuery() {
+        return origQuery;
+    }
 
     public WebParams(String query) {
         this.origQuery = query;
@@ -94,6 +100,10 @@ public class WebParams implements SearchSettings {
                         records = Integer.valueOf(pair[1].trim());
                     } else {
                         records = null;
+                    }
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.bypage)) {
+                    if (pair[1].trim().equals("true")) {
+                        wasFromPage = true;
                     }
                 }
 
@@ -191,6 +201,12 @@ public class WebParams implements SearchSettings {
             return records;
         }
     }
+
+    public boolean isWasFromPage() {
+        return wasFromPage;
+    }
+    
+    
 
     @Override
     public Formatter createFormatter(PrintStream out) {

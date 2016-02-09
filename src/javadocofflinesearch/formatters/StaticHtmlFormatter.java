@@ -139,4 +139,9 @@ public class StaticHtmlFormatter implements Formatter {
         out.println("</div>");
     }
 
+    @Override
+    public void pages(int from, int to, int total) {
+        
+    }
+
 }
