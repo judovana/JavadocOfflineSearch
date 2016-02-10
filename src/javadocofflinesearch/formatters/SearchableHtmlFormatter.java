@@ -8,6 +8,8 @@ package javadocofflinesearch.formatters;
 import java.io.PrintStream;
 import java.util.Date;
 import javadocofflinesearch.server.WebParams;
+import javadocofflinesearch.tools.Commandline;
+import javadocofflinesearch.tools.HardcodedDefaults;
 
 /**
  *
@@ -18,19 +20,21 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     private final WebParams defaults;
     private static final String CHECKED = "checked";
     public static final String searchType = "search-type";
-    public static final String merge = "merge";
-    public static final String query = "query";
-    public static final String noInfo = "no-info";
-    public static final String showAlsoPdfInfo = "show-pdf-info";
+    public static final String previewMaxShow = "previewMaxShow";
+    public static final String previewMaxLoad = "previewMaxLoad";
+    public static final String merge = Commandline.MERGE_COMAPRATORS;
+    public static final String query = Commandline.QUERY;
+    public static final String noInfo = Commandline.NO_INFO;
+    public static final String showAlsoPdfInfo = "xnot-" + Commandline.NO_PDF_INFO;
 
-    public static final String infoBefore = "infoBefore";
-    public static final String infoAfter = "infoAfter";
+    public static final String infoBefore = Commandline.INFO_BEFORE;
+    public static final String infoAfter = Commandline.INFO_AFTER;
 
-    public static final String ddmDeadline = "ddmDeadline";
-    public static final String ddmCount = "ddmCount";
-    public static final String startAt = "startAt";
-    public static final String records = "records";
-    
+    public static final String ddmDeadline = Commandline.DEAD_LINE;
+    public static final String ddmCount = Commandline.DID_COUNT;
+    public static final String startAt = Commandline.START_AT;
+    public static final String records = Commandline.RECORDS;
+
     //special field to reset item to start form when clicekd via "pages link"
     public static final String bypage = "bypage";
 
@@ -64,9 +68,9 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
             String s = defaults.getOrigQuery();
             int pages = (total / recordsPerPage) + 1;
             for (int i = 0; i < pages; i++) {
-                String nwq = "search?" + s.replaceAll(startAt + "=\\d*", startAt + "=" + (i * (defaults.getRecords())))+"&"+bypage+"=true";
+                String nwq = "search?" + s.replaceAll(startAt + "=\\d*", startAt + "=" + (i * (defaults.getRecords()))) + "&" + bypage + "=true";
                 if (i * (defaults.getRecords()) >= from && i * (defaults.getRecords()) < to) {
-                     out.println("<b> " + (i + 1) + " </b>");
+                    out.println("<b> " + (i + 1) + " </b>");
                 } else {
                     out.println("<a href='" + nwq + "' > " + (i + 1) + " </a>");
                 }
@@ -85,23 +89,25 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("<span>");
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"page-index\" " + getCheckedPage() + "> use page index (it learns!)");
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"lucene-index\" " + getCheckedLucene() + "> use lucene index");
-        out.println("<input type=\"checkbox\" name=\"" + merge + "\" value=\"true\"  " + getCheckedMerge() + ">merge both indexes");
-        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a><br/>");
+        out.println("<input type=\"checkbox\" name=\"" + merge + "\" value=\"true\"  " + getCheckedMerge() + ">" + getMergeText());
+        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a> see indexes: file://path page/lucene<br/>");
         out.println("</span>");
         out.println("<span>");
         out.println("  <input type=\"text\" id='t1' name=\"" + query + "\" value=\"" + getQueryValue() + "\"   style=\"width:99%;\"/><br/>");
         out.println("</span>");
         out.println("<span style='float: right;'>");
         out.println("<span onclick=\"document.getElementById('advanced').style.display = 'block'\" ondblclick=\"document.getElementById('advanced').style.display = 'none'\">Click for more settings:</span><br/>");
-        out.println("<span id='advanced' style='display:none;float: right;'>");
-        out.println("  <input type=\"checkbox\" name=\"" + noInfo + "\" value=\"true\" " + getWasInfoSelcted() + "/> hide text-out info<br/>");
-        out.println("  <input type=\"checkbox\" name=\"" + showAlsoPdfInfo + "\" value=\"true\" " + getWasshowAlsoPdfInfoSeelcted() + "/> load also info from pdfs<br/>");
+        out.println("<span id='advanced' style='display:none;float: right; border:dotted; margin: 5px'>");
+        out.println("  <input type=\"checkbox\" name=\"" + noInfo + "\" value=\"true\" " + getWasInfoSelcted() + "/> " + getInfoText() + "<br/>");
+        out.println("  <input type=\"checkbox\" name=\"" + showAlsoPdfInfo + "\" value=\"true\" " + getWasshowAlsoPdfInfoSeelcted() + "/> " + getPdfText() + "<br/>");
         out.println("  <input type=\"text\"  id='t2' name=\"" + infoBefore + "\" value=\"" + wasInfoB() + "\"/> how much text to show before highlighted info<br/>");
         out.println("  <input type=\"text\"  id='t3' name=\"" + infoAfter + "\" value=\"" + wasInfoA() + "\"/> how much text to show after highlighted info<br/>");
         out.println("  <input type=\"text\"  id='t4' name=\"" + ddmDeadline + "\" value=\"" + wasDDD() + "\"/>if total-found is bigger then this number, `do you mean ` do not appear<br/>");
         out.println("  <input type=\"text\"  id='t5' name=\"" + ddmCount + "\" value=\"" + wasDDC() + "\"/> number of suggested typo-fixing items<br/>");
         out.println("  <input type=\"text\"  id='t6' name=\"" + startAt + "\" value=\"" + wasStartAt() + "\"/> item to start showing on<br/>");
         out.println("  <input type=\"text\"  id='t7' name=\"" + records + "\" value=\"" + wasRecords() + "\"/> items per page<br/>");
+        out.println("  <input type=\"text\"  id='t8' name=\"" + previewMaxShow + "\" value=\"" + wasMS() + "\"/> items to show in preview<br/>");
+        out.println("  <input type=\"text\"  id='t9' name=\"" + previewMaxLoad + "\" value=\"" + wasML() + "\"/> items to load to show in preview<br/>");
         out.println("</span>");
         out.println("</span>");
         //without submitbutton, the enter key do not work when more then one input type 'text' is presented
@@ -109,20 +115,16 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("</form>");
     }
 
-    private String getCheckedMerge() {
-        if (defaults != null) {
-            if (defaults.isMergeWonted()) {
-                return CHECKED;
-            }
-        }
-        return "";
-    }
-
     private String getCheckedLucene() {
         if (defaults != null) {
             if (!defaults.isPage()) {
                 return CHECKED;
+            } else {
+                return "";
             }
+        }
+        if (HardcodedDefaults.isLuceneByDefault()) {
+            return CHECKED;
         }
         return "";
     }
@@ -131,7 +133,12 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         if (defaults != null) {
             if (defaults.isPage()) {
                 return CHECKED;
+            } else {
+                return "";
             }
+        }
+        if (!HardcodedDefaults.isLuceneByDefault()) {
+            return CHECKED;
         }
         return "";
     }
@@ -145,43 +152,25 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         return "";
     }
 
-    private String getWasInfoSelcted() {
-        if (defaults != null) {
-            if (!defaults.isInfo()) {
-                return CHECKED;
-            }
-        }
-        return "";
-    }
-    
-     private String getWasshowAlsoPdfInfoSeelcted() {
-        if (defaults != null) {
-            if (!defaults.isOmitPdfInfo()) {
-                return CHECKED;
-            }
-        }
-        return "";
-    }
-
     private String wasDDD() {
         if (defaults != null) {
             return defaults.getDidYouMeantDeadLine() + "";
         }
-        return "";
+        return HardcodedDefaults.getDidYouMeantDeadLine() + "";
     }
 
     private String wasDDC() {
         if (defaults != null) {
             return defaults.getDidYouMeantCount() + "";
         }
-        return "";
+        return HardcodedDefaults.getDidYouMeantCount() + "";
     }
 
     private String wasRecords() {
         if (defaults != null) {
             return defaults.getRecords() + "";
         }
-        return "";
+        return HardcodedDefaults.getShowRecordsDefault() + "";
     }
 
     private String wasStartAt() {
@@ -195,12 +184,97 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         if (defaults != null) {
             return defaults.getInfoAfter() + "";
         }
-        return "";
+        return HardcodedDefaults.getDefaultAfter() + "";
     }
 
     private String wasInfoB() {
         if (defaults != null) {
             return defaults.getInfoBefore() + "";
+        }
+        return HardcodedDefaults.getDefaultBefore() + "";
+    }
+
+    private String wasMS() {
+        if (defaults != null) {
+            return defaults.getInfoShow() + "";
+        }
+        return HardcodedDefaults.getInfoShow() + "";
+    }
+
+    private String wasML() {
+        if (defaults != null) {
+            return defaults.getInfoLoad() + "";
+        }
+        return HardcodedDefaults.getInfoLoad() + "";
+    }
+
+    public WebParams getDefaults() {
+        return defaults;
+    }
+
+    private String getMergeText() {
+        if (HardcodedDefaults.isMergeResults()) {
+            return "don't merge results";
+        } else {
+            return "merge both indexes";
+
+        }
+    }
+
+    private String getInfoText() {
+        if (HardcodedDefaults.isNoInfo()) {
+            return "show text-out info";
+        } else {
+            return "hide text-out info";
+        }
+    }
+
+    private String getPdfText() {
+        if (HardcodedDefaults.isNoPdfInfo()) {
+            return "load also info from pdfs";
+        } else {
+            return "dont load info from pdfs";
+        }
+    }
+
+    private String getWasInfoSelcted() {
+        if (defaults != null) {
+            if (defaults.isNegateInfo()) {
+                return CHECKED;
+            } else {
+                return "";
+            }
+        }
+        if (HardcodedDefaults.isNoInfo()) {
+            return "";
+        }
+        return CHECKED;
+    }
+
+    private String getCheckedMerge() {
+        if (defaults != null) {
+            if (defaults.isNegateMerge()) {
+                return CHECKED;
+            } else {
+                return "";
+            }
+        }
+        if (HardcodedDefaults.isMergeResults()) {
+            return CHECKED;
+        }
+        return "";
+    }
+
+    private String getWasshowAlsoPdfInfoSeelcted() {
+        if (defaults != null) {
+            if (defaults.isNegatePdf()) {
+                return CHECKED;
+            } else {
+                return "";
+            }
+        }
+        if (!HardcodedDefaults.isNoPdfInfo()) {
+            return CHECKED;
         }
         return "";
     }

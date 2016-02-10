@@ -51,7 +51,9 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.lucene.MainIndex;
+import javadocofflinesearch.tools.HardcodedDefaults;
 import javadocofflinesearch.tools.LevenshteinDistance;
+import javadocofflinesearch.tools.Setup;
 
 /**
  * based on http://www.mcwalter.org/technology/java/httpd/tiny/index.html Very
@@ -130,6 +132,9 @@ public class TinyHttpdImpl extends Thread {
                     if (isGetRequest) {
                         if (filePath.trim().length() <= 1) {
                             SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer);
+                            contentType = "Content-Type: ";
+                            contentType += "text/html";
+                            contentType += CRLF;
                             writer.print(HTTP_OK + contentType + CRLF);
                             xr.haders();
                             xr.tail();
@@ -149,30 +154,37 @@ public class TinyHttpdImpl extends Thread {
                                 //consuming, is check
                             }
                             if (decodingStream != null) {
-                                System.out.println("Returning file: " + potentionalFile);
-                                if (potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm")) {
-                                    contentType = "Content-Type: ";
-                                    contentType += "text/html";
-                                    contentType += CRLF;
-                                }
-                                if (potentionalFile.toLowerCase().endsWith(".css")) {
-                                    contentType = "Content-Type: ";
-                                    contentType += "text/css";
-                                    contentType += CRLF;
-                                }
-                                if (potentionalFile.toLowerCase().endsWith(".pdf")) {
-                                    contentType = "Content-Type: ";
-                                    contentType += "application/pdf";
-                                    contentType += CRLF;
-                                }
-                                //this is learning, more this hreff is clicked, more is recorded
-                                mainIndex.clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
-                                byte[] buff = streamToBYteArray(decodingStream);
+                                try {
+                                    if (!Setup.getSetup().isFileValid(potentionalFile)) {
+                                        System.out.println("Security blocked " + potentionalFile + " from showing.");
+                                        throw new SecurityException("Sorry, security is on");
+                                    }
+                                    System.out.println("Returning file: " + potentionalFile);
+                                    if (potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm")) {
+                                        contentType = "Content-Type: ";
+                                        contentType += "text/html";
+                                        contentType += CRLF;
+                                    }
+                                    if (potentionalFile.toLowerCase().endsWith(".css")) {
+                                        contentType = "Content-Type: ";
+                                        contentType += "text/css";
+                                        contentType += CRLF;
+                                    }
+                                    if (potentionalFile.toLowerCase().endsWith(".pdf")) {
+                                        contentType = "Content-Type: ";
+                                        contentType += "application/pdf";
+                                        contentType += CRLF;
+                                    }
+                                    //this is learning, more this hreff is clicked, more is recorded
+                                    mainIndex.clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
+                                    byte[] buff = streamToBYteArray(decodingStream);
 
-                                String lastModified = "Last-Modified: " + new Date() + CRLF;
-                                writer.print(HTTP_OK + "Content-Length:" + buff.length + CRLF + lastModified + contentType + CRLF);
-                                writer.write(buff);
-
+                                    String lastModified = "Last-Modified: " + new Date() + CRLF;
+                                    writer.print(HTTP_OK + "Content-Length:" + buff.length + CRLF + lastModified + contentType + CRLF);
+                                    writer.write(buff);
+                                } finally {
+                                    decodingStream.close();
+                                }
                             } else if (command.toLowerCase().equals("/search")) {
                                 WebParams cmds = new WebParams(query);
                                 contentType = "Content-Type: ";
@@ -195,7 +207,7 @@ public class TinyHttpdImpl extends Thread {
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (Exception e) {
-                writer.print(HTTP_OK + "" + CRLF);
+                writer.print(HTTP_NOT_IMPLEMENTED + "" + CRLF);
                 e.printStackTrace(writer);
                 e.printStackTrace();
             } finally {

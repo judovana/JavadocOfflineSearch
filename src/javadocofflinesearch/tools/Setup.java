@@ -37,35 +37,35 @@ public class Setup implements IndexerSettings {
     private final File MAIN_CONFIG;
     Properties p = new Properties();
 
-    public static final String SECURITY = "security";
-    private boolean security = true;
+    private static final String SECURITY = "security";
 
-    private static final String DEF_OW_showBefore = "overwrite.showBefore";
-    private Integer showBefor = -40;
-
-    private static final String DEF_OW_showAfter = "overwrite.showAfter";
-    private Integer showAfter = 40;
-
-    private static final String DEF_OW_deadine = "overwrite.deadline";
-    private Integer deadline = 10;
-
-    private static final String DEF_OW_sugcount = "overwrite.count";
-    private Integer count = 10;
-
-    private static final String DEF_OW_perpage = "overwrite.perpage";
-    private Integer perpage = Integer.MAX_VALUE;
-    
-    //how much MATCHES will InfoExtractor  READ
+    private static final String DEF_OW_showBefore = "overwrite." + Commandline.INFO_BEFORE;
+    private static final String DEF_OW_showAfter = "overwrite." + Commandline.INFO_AFTER;
+    private static final String DEF_OW_deadine = "overwrite." + Commandline.DEAD_LINE;
+    private static final String DEF_OW_sugcount = "overwrite." + Commandline.DID_COUNT;
+    private static final String DEF_OW_perpage = "overwrite." + Commandline.RECORDS;
+    private static final String DEF_OW_lucene = "overwrite." + Commandline.LUCENE_RANK;
+    private static final String DEF_OW_noinfo = "overwrite." + Commandline.NO_INFO;
+    private static final String DEF_OW_merge = "overwrite." + Commandline.MERGE_COMAPRATORS;
+    private static final String DEF_OW_pdfs = "overwrite." + Commandline.NO_PDF_INFO;
     private static final String DEF_OW_previewMaxLoad = "overwrite.previewMaxLoad";
-    private Integer previewMaxLoad = 30;
-    
-    //how much MATCHES will InfoExtractor  SHOW
     private static final String DEF_OW_previewMaxShow = "overwrite.previewMaxShow";
-    private Integer previewMaxShow = 15;
-    
 
     public void preload() throws IOException {
         loadImpl();
+    }
+
+    public boolean isFileValid(String potentionalFile) {
+        if (!HardcodedDefaults.isSecurity()) {
+            return true;
+        }
+        String[] l = getDirsString();
+        for (String s : l) {
+            if (potentionalFile.startsWith(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static class SetupHolder {
@@ -124,7 +124,22 @@ public class Setup implements IndexerSettings {
             p.setProperty(PLC, PLC_VALUE);
             p.setProperty(INCLUDE, String.valueOf(INCLUDE_VAL));
             p.setProperty(SUFFIXES, SUFFIXES_VAl);
-            p.store(new FileOutputStream(MAIN_CONFIG), "All lists are semicolon separated.");
+
+            p.setProperty(SECURITY, String.valueOf(HardcodedDefaults.isSecurity()));
+
+            p.setProperty(DEF_OW_showBefore, String.valueOf(HardcodedDefaults.getDefaultBefore()));
+            p.setProperty(DEF_OW_showAfter, String.valueOf(HardcodedDefaults.getDefaultBefore()));
+            p.setProperty(DEF_OW_deadine, String.valueOf(HardcodedDefaults.getDidYouMeantDeadLine()));
+            p.setProperty(DEF_OW_sugcount, String.valueOf(HardcodedDefaults.getDidYouMeantCount()));
+            p.setProperty(DEF_OW_perpage, String.valueOf(HardcodedDefaults.getShowRecordsDefault()));
+            p.setProperty(DEF_OW_lucene, String.valueOf(HardcodedDefaults.isLuceneByDefault()));
+            p.setProperty(DEF_OW_noinfo, String.valueOf(HardcodedDefaults.isNoInfo()));
+            p.setProperty(DEF_OW_merge, String.valueOf(HardcodedDefaults.isMergeResults()));
+            p.setProperty(DEF_OW_pdfs, String.valueOf(HardcodedDefaults.isNoPdfInfo()));
+            p.setProperty(DEF_OW_previewMaxLoad, String.valueOf(HardcodedDefaults.getInfoLoad()));
+            p.setProperty(DEF_OW_previewMaxShow, String.valueOf(HardcodedDefaults.getInfoShow()));
+
+            p.store(new FileOutputStream(MAIN_CONFIG), "All lists are semicolon separated. When security is true, server is not returning not-inidexed files.");
         }
     }
 
@@ -209,6 +224,82 @@ public class Setup implements IndexerSettings {
 
         }
         return r;
+    }
+////////////////////////////////hardcodes overwrites
+
+    private static String getSafeValue(String s) {
+        Setup setup = getSetup();
+        if (setup == null) {
+            return null;
+        }
+        return setup.p.getProperty(s);
+
+    }
+
+    private static Boolean getBoolean(String s) {
+        String stringValue = getSafeValue(s);
+        if (stringValue == null) {
+            return null;
+        }
+        return Boolean.valueOf(stringValue);
+    }
+
+    private static Integer getInteger(String s) {
+        String stringValue = getSafeValue(s);
+        if (stringValue == null) {
+            return null;
+        }
+        return Integer.valueOf(stringValue);
+    }
+
+    public static Boolean isSecurity() {
+
+        return getBoolean(SECURITY);
+
+    }
+
+    public static Integer getShowBefore() {
+        return getInteger(DEF_OW_showBefore);
+    }
+
+    public static Integer getShowAfter() {
+        return getInteger(DEF_OW_showAfter);
+    }
+
+    public static Integer getDeadline() {
+        return getInteger(DEF_OW_deadine);
+    }
+
+    public static Integer getCount() {
+        return getInteger(DEF_OW_sugcount);
+    }
+
+    public static Integer getPerPage() {
+        return getInteger(DEF_OW_perpage);
+    }
+
+    public static Boolean isLucenePreffered() {
+        return getBoolean(DEF_OW_lucene);
+    }
+
+    public static Boolean isnoInfo() {
+        return getBoolean(DEF_OW_noinfo);
+    }
+
+    public static Boolean isMergeWonted() {
+        return getBoolean(DEF_OW_merge);
+    }
+
+    public static Boolean isPdfInfoSilenced() {
+        return getBoolean(DEF_OW_pdfs);
+    }
+
+    public static Integer getMaxLoad() {
+        return getInteger(DEF_OW_previewMaxLoad);
+    }
+
+    public static Integer getMaxShow() {
+        return getInteger(DEF_OW_previewMaxShow);
     }
 
 }

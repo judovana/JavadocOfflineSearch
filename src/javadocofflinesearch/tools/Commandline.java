@@ -34,33 +34,30 @@ public class Commandline implements SearchSettings {
     private static final String HELP = "help";
     private static final String INDEX = "index";
     private static final String VERSION = "version";
-    private static final String PAGE_RANK = "page-rank";
-    private static final String LUCENE_RANK = "lucene-rank";
-    private static final String NO_INFO = "no-info";
+    private static final String PAGE_RANK = "page-rank"; //those two ranks are not hardcoded on one place, because cmd/web is handling them differently
+    static final String LUCENE_RANK = "lucene-rank";
+    //pacakge private items are setupable in deployment.properties
+    //public items are reused also in WebParams 
+    public static final String NO_INFO = "no-info";
     private static final String MORE_INFO = "more-info";
-    private static final String QUERY = "query";
+    public static final String QUERY = "query";
     private static final String START_SERVER = "start-server";
-    private static final String MERGE_COMAPRATORS = "merge-results";
+    public static final String MERGE_COMAPRATORS = "merge-results";
     private static final String EXTRACT_INFO = "exctract-info";
     private static final String OUTPUT_COLOUR = "color";
     private static final String OUTPUT_HTML = "html";
     private static final String OUTPUT_AJAX = "ajax";
     private static final String OUTPUT_PLAIN = "plain";
-    private static final String INFO_AFTER = "info-after";
-    private static final String INFO_BEFORE = "info-before";
-    public static final int defaultBefore = 40;
-    public static final int defaultAfter = 40;
-    public static final int didYouMeantDeadLine = 10;
-    public static final int didYouMeantCount = 10;
-    private static final String DEAD_LINE = "did-you-mean-deadline";
-    private static final String DID_COUNT = "did-you-mean-count";
+    public static final String INFO_AFTER = "info-after";
+    public static final String INFO_BEFORE = "info-before";
+    public static final String DEAD_LINE = "did-you-mean-deadline";
+    public static final String DID_COUNT = "did-you-mean-count";
     private static final int startAtDefault = 0;
-    private static final String START_AT = "start-at";
-    private static final int showRecordsDefault = Integer.MAX_VALUE;
-    private static final String RECORDS = "records";
+    public static final String START_AT = "start-at";
+    public static final String RECORDS = "records";
     private static final String ARCHIVES = "omit-archives";
     private static final String PRINT_ENGINE = "print-engine";
-    public static final String noPdfInfo = "no-pdf-info";
+    public static final String NO_PDF_INFO = "no-pdf-info"; 
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -73,18 +70,18 @@ public class Commandline implements SearchSettings {
         Option server = new Option("s", START_SERVER, false, "will start the server on port 31745. You can then search in browser by http://lcoalhost:" + JavadocOfflineSearch.PORT);
         Option merge = new Option("g", MERGE_COMAPRATORS, false, "will use both lucene and page sorting to determine results");
         Option exInfo = new Option("x", EXTRACT_INFO, true, "from given document, extract those ...info...  based on query");
-        Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + defaultBefore);
-        Option infoAfter = new Option("A", INFO_AFTER, true, "number of characters between 'match' and '...'. default " + defaultAfter);
-        Option didDead = new Option("d", DEAD_LINE, true, "min. number of result to occure before 'did you ment' is suggested. default " + didYouMeantDeadLine);
-        Option didCount = new Option("D", DID_COUNT, true, "how meny 'did you ment' is suggested. default " + didYouMeantCount);
+        Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + HardcodedDefaults.getDefaultBefore());
+        Option infoAfter = new Option("A", INFO_AFTER, true, "number of characters between 'match' and '...'. default " + HardcodedDefaults.getDefaultAfter());
+        Option didDead = new Option("d", DEAD_LINE, true, "min. number of result to occure before 'did you ment' is suggested. default " + HardcodedDefaults.getDidYouMeantDeadLine());
+        Option didCount = new Option("D", DID_COUNT, true, "how meny 'did you ment' is suggested. default " + HardcodedDefaults.getDidYouMeantCount());
         Option startAtOpt = new Option("R", START_AT, true, "start at record #number. Default  " + startAtDefault);
-        Option recordsOpt = new Option("r", RECORDS, true, "show number of recods #number. Default  " + showRecordsDefault);
+        Option recordsOpt = new Option("r", RECORDS, true, "show number of recods #number. Default  " + HardcodedDefaults.getShowRecordsDefault());
         Option outputColor = new Option("c", OUTPUT_COLOUR, false, "will use colored shell output (default in terminal)");
         Option outputHtml = new Option("t", OUTPUT_HTML, false, "will force html marked up output");
         Option outputAjax = new Option("a", OUTPUT_AJAX, false, "will force html marked up with ajax info snippets (not finished, and probably never will)");
         Option outputPlain = new Option("y", OUTPUT_PLAIN, false, "will use simple palintext output (default out of terminal)");
         Option archives = new Option("z", ARCHIVES, false, "will ignore items from archvies from search results");
-        Option pdfInfo = new Option("P", noPdfInfo, false, "will not print info from pdfs");
+        Option pdfInfo = new Option("P", NO_PDF_INFO, false, "will not print info from pdfs");
 
         Option search = new Option("q", QUERY, true, "is considered default when no argument is given. Search docs. '-' connected wth word is NOT.");
         Option engine = new Option("e", PRINT_ENGINE, false, "will print out firefox's search engine to be used as firefox plugin");
@@ -240,7 +237,10 @@ public class Commandline implements SearchSettings {
         if (hasPageRank()) {
             return true;
         }
-        return !hasLuceneRank();
+        if (hasLuceneRank()){
+        return false;
+        }
+        return !HardcodedDefaults.isLuceneByDefault();
     }
 
     @Override
@@ -248,22 +248,38 @@ public class Commandline implements SearchSettings {
         if (hasMoreInfo()) {
             return true;
         }
-        return !hasNoInfo();
+        if (hasNoInfo()){
+            return false;
+        }
+        return !HardcodedDefaults.isNoInfo();
     }
 
+    
+    public boolean hasMergeWonted() {
+        return line.hasOption(MERGE_COMAPRATORS);
+    }
     @Override
     public boolean isMergeWonted() {
-        return line.hasOption(MERGE_COMAPRATORS);
+        if (hasMergeWonted()){
+            return true;
+        }
+        return HardcodedDefaults.isMergeResults();
     }
 
     @Override
     public boolean isOmitArchives() {
-        return line.hasOption(ARCHIVES);
+        if (line.hasOption(ARCHIVES)){
+            return true;
+        }
+        return HardcodedDefaults.isOmitArchives();
     }
     
      @Override
     public boolean isOmitPdfInfo() {
-        return line.hasOption(noPdfInfo);
+        if (line.hasOption(NO_PDF_INFO)){
+            return true;
+        }
+        return HardcodedDefaults.isNoPdfInfo();
     }
 
     public boolean isColoured() {
@@ -283,7 +299,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(INFO_BEFORE)) {
             return -Math.abs(Integer.valueOf(line.getOptionValue(INFO_BEFORE)));
         } else {
-            return -Math.abs(defaultBefore);
+            return -Math.abs(HardcodedDefaults.getDefaultBefore());
         }
     }
 
@@ -292,7 +308,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(INFO_AFTER)) {
             return Integer.valueOf(line.getOptionValue(INFO_AFTER));
         } else {
-            return defaultAfter;
+            return HardcodedDefaults.getDefaultAfter();
         }
     }
 
@@ -301,7 +317,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(DEAD_LINE)) {
             return Integer.valueOf(line.getOptionValue(DEAD_LINE));
         } else {
-            return didYouMeantDeadLine;
+            return HardcodedDefaults.getDidYouMeantDeadLine();
         }
     }
 
@@ -310,7 +326,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(DID_COUNT)) {
             return Integer.valueOf(line.getOptionValue(DID_COUNT));
         } else {
-            return didYouMeantCount;
+            return HardcodedDefaults.getDidYouMeantCount();
         }
     }
 
@@ -328,7 +344,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(RECORDS)) {
             return Integer.valueOf(line.getOptionValue(RECORDS));
         } else {
-            return showRecordsDefault;
+            return HardcodedDefaults.getShowRecordsDefault();
         }
     }
 

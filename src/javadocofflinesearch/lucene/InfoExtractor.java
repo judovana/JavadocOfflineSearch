@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javadocofflinesearch.formatters.Formatter;
+import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.htmlprocessing.StreamCrossroad;
+import javadocofflinesearch.tools.HardcodedDefaults;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -26,7 +28,20 @@ public class InfoExtractor {
         s = s.replaceAll("<!--.*?-->", "");//?
         Pattern p = Pattern.compile("(?i)" + queryString.trim().replaceAll("\\s+", "|"));
         Matcher m = p.matcher(s);
-        int noMoreNeeded = 30;
+        int noMoreNeeded = HardcodedDefaults.getInfoLoad();
+        int show = HardcodedDefaults.getInfoShow();
+
+        if (f != null && f instanceof SearchableHtmlFormatter) {
+            SearchableHtmlFormatter w = (SearchableHtmlFormatter) f;
+            if (w.getDefaults() != null) {
+                if (w.getDefaults().getInfoLoad() != null) {
+                    noMoreNeeded = w.getDefaults().getInfoLoad();
+                }
+                if (w.getDefaults().getInfoShow() != null) {
+                    show = w.getDefaults().getInfoShow();
+                }
+            }
+        }
         List<String> hunks = new ArrayList<>(noMoreNeeded + 1);
         while (m.find()) {
 
@@ -54,18 +69,23 @@ public class InfoExtractor {
                 break;
             }
         }
-        int start = 0;
-        int end = 20;
-        if (hunks.size() > 5) {
-            start = 5;
+        if (show == 0) {
+            show = Integer.MAX_VALUE;
         }
-        if (end >= hunks.size()) {
-            end = hunks.size();
+        double increment;
+        if (show >= hunks.size()) {
+            increment = 1;
+        } else {
+            increment = ((double) hunks.size()) / ((double) show);
         }
+        int lastInt = -1;
         StringBuilder result = new StringBuilder();
-        for (int i = start; i < end; i++) {
-            result.append(hunks.get(i));
-
+        for (double i = 0; i < hunks.size(); i += increment) {
+            int nwInt = (int) Math.round(i);
+            if (nwInt != lastInt && nwInt < hunks.size()) { //ensure not duplicated ints
+                result.append(hunks.get(nwInt));
+                lastInt = nwInt;
+            }
         }
         return result.append("...").toString();
     }

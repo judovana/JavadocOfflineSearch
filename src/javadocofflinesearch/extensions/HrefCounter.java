@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -102,8 +101,8 @@ public class HrefCounter {
                 if (s == null) {
                     return;
                 }
-                String[] ss = s.split("\\s+");
-                where.put(ss[0], Integer.valueOf(ss[1]));
+                int i = s.lastIndexOf(" ");
+                where.put(s.substring(0,i).trim(), Integer.valueOf(s.substring(i).trim()));
             }
         }
     }
