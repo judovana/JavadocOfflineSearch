@@ -23,6 +23,7 @@ public class WebParams implements SearchSettings {
     private boolean lucene = false;
     private boolean merge = false;
     private boolean noInfo = false;
+    private boolean showPdfINfo = false;
 
     private boolean wasFromPage = false;
 
@@ -63,6 +64,10 @@ public class WebParams implements SearchSettings {
                 } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.noInfo)) {
                     if (pair[1].equalsIgnoreCase("true")) {
                         noInfo = true;
+                    }
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.showAlsoPdfInfo)) {
+                    if (pair[1].equalsIgnoreCase("true")) {
+                        showPdfINfo = true;
                     }
                 }//now less usefull stuff 
                 else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.infoBefore)) {
@@ -142,6 +147,12 @@ public class WebParams implements SearchSettings {
         //no need to epxose this via web
         return false;
     }
+    
+    @Override
+    public boolean isOmitPdfInfo() {
+        return !showPdfINfo;
+    }
+    
 
     @Override
     public boolean isMergeWonted() {
@@ -205,8 +216,6 @@ public class WebParams implements SearchSettings {
     public boolean isWasFromPage() {
         return wasFromPage;
     }
-    
-    
 
     @Override
     public Formatter createFormatter(PrintStream out) {

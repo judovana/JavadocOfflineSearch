@@ -1,7 +1,5 @@
 package javadocofflinesearch.lucene;
 
-import javadocofflinesearch.htmlprocessing.MalformedXmlParser;
-import javadocofflinesearch.htmlprocessing.XmledHtmlToText;
 import javadocofflinesearch.tools.TitledByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javadocofflinesearch.htmlprocessing.StreamCrossroad;
 import javadocofflinesearch.tools.LevenshteinDistance;
 import javadocofflinesearch.tools.Setup;
 import org.apache.lucene.document.Document;
@@ -32,12 +31,12 @@ import org.apache.lucene.index.Term;
 public class SingleIndexer implements Runnable {
 
     private final IndexWriter writer;
-    private final XmledHtmlToText htmlizer;
+    private final StreamCrossroad streamizer;
     private int files = 0;
 
-    SingleIndexer(IndexWriter writer, XmledHtmlToText htmlizer) {
+    SingleIndexer(IndexWriter writer, StreamCrossroad streamizer) {
         this.writer = writer;
-        this.htmlizer = htmlizer;
+        this.streamizer = streamizer;
     }
 
     @Override
@@ -55,8 +54,7 @@ public class SingleIndexer implements Runnable {
             System.out.println("Saving priorities and vocabulary");
             start = new Date();
             try {
-                htmlizer.getHc().saveHrefs();
-                htmlizer.getVc().saveVocs();
+                streamizer.saveCacheMetadata();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
@@ -110,7 +108,7 @@ public class SingleIndexer implements Runnable {
      */
     private void indexDoc(IndexWriter writer, URL file) throws IOException {
         files++;
-        try (InputStream stream = htmlizer.parseAnother(MalformedXmlParser.xmlizeInputStream(file.openStream()), file)) {
+        try (InputStream stream = streamizer.tryURL(file)) {
             // make a new, empty document
             Document doc = new Document();
 

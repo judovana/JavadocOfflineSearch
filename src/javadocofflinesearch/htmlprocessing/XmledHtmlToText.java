@@ -26,20 +26,20 @@ public class XmledHtmlToText {
     private final HrefCounter hc;
     private final Vocabulary vc;
 
-    public XmledHtmlToText(HrefCounter hc, Vocabulary vc) {
+     XmledHtmlToText(HrefCounter hc, Vocabulary vc) {
         this.hc = hc;
         this.vc = vc;
     }
 
-    public HrefCounter getHc() {
+     HrefCounter getHc() {
         return hc;
     }
 
-    public Vocabulary getVc() {
+     Vocabulary getVc() {
         return vc;
     }
 
-    public InputStream parseAnother(InputStream hoefullyXmlizedInputStream, URL current) {
+    InputStream parseAnother(InputStream hoefullyXmlizedInputStream, URL current) {
         try {
             String[] l = parseAnotherII(hoefullyXmlizedInputStream, current, true);
             return new TitledByteArrayInputStream(l[0], l[1].getBytes(StandardCharsets.UTF_8));
@@ -50,7 +50,7 @@ public class XmledHtmlToText {
         }
     }
 
-    public String[] parseAnotherII(InputStream hoefullyXmlizedInputStream, URL current, boolean stats) throws ParserConfigurationException, SAXException, IOException {
+    String[] parseAnotherII(InputStream hoefullyXmlizedInputStream, URL current, boolean stats) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuild = dbf.newDocumentBuilder();
         Document doc = docBuild.parse(hoefullyXmlizedInputStream);

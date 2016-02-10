@@ -35,4 +35,6 @@ public interface SearchSettings {
     public int getRecords();
 
     public boolean isOmitArchives();
+    
+    public boolean isOmitPdfInfo();
 }

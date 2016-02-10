@@ -160,6 +160,11 @@ public class TinyHttpdImpl extends Thread {
                                     contentType += "text/css";
                                     contentType += CRLF;
                                 }
+                                if (potentionalFile.toLowerCase().endsWith(".pdf")) {
+                                    contentType = "Content-Type: ";
+                                    contentType += "application/pdf";
+                                    contentType += CRLF;
+                                }
                                 //this is learning, more this hreff is clicked, more is recorded
                                 mainIndex.clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
                                 byte[] buff = streamToBYteArray(decodingStream);

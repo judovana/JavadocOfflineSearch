@@ -18,7 +18,7 @@ import org.xml.sax.XMLReader;
  */
 public class MalformedXmlParser {
 
-    public static InputStream xmlizeInputStream(InputStream original) {
+     static InputStream xmlizeInputStream(InputStream original) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 

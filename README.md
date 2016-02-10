@@ -18,19 +18,22 @@ run
  * java -jar JavadocOfflineSearch.jar  -start-server & firefox
 to use firefox search plugin comaptible and/or commandline approach run:
 
-Is capable to index htmldocs and plaintexts. Is capable to index/access archived (zip/jar) docs
+Is capable to index htmldocs, plaintexts and pdfs. Is capable to index/access archived (zip/jar) docs
 Uses lucene index and page-rank index. (Or mixture f both if you wish)
 page-rank is original google's algorithm. More pages is pointing to the target, more prefered it is.
 More times you click to any resource, more page-rank it gets too.
+If you wont to ignore pdfs and are using assembeld version, then you can put .pdf to list of ignored suffixes in your javadocOfflineSearch.properties
 
-Of course plain text files are very hardly to be sorted by page-rank (unless some htmls are pointing to those plain files)
+Of course plain text/pdfs files are very hardly to be sorted by page-rank (unless some htmls are pointing to those plain files)
 ```
 # Requirements
 ```
 Requires: tagsoup, lucene-core, lucene-analyzers-common, lucene-queries, lucene-queryparser, (appache)commons-cli
+If you wont to index also pdfs, you need also: (apache)pdfbox, appache-commons-logging-api, appache-commons-logging, (apache)fontbox
 ```
 # WARNING
 ```
 Never ever run this as public service. This is exposing all yor local files and content of archives when used online!
 Index what YOU need and run it when YOU need.
+security attribute in javadocOfflineSearch.properties checks if accesed resource was actually indexed, but still, at least dont run it as root.
 ```

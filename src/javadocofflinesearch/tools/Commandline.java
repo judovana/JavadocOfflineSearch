@@ -60,6 +60,7 @@ public class Commandline implements SearchSettings {
     private static final String RECORDS = "records";
     private static final String ARCHIVES = "omit-archives";
     private static final String PRINT_ENGINE = "print-engine";
+    public static final String noPdfInfo = "no-pdf-info";
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -83,6 +84,7 @@ public class Commandline implements SearchSettings {
         Option outputAjax = new Option("a", OUTPUT_AJAX, false, "will force html marked up with ajax info snippets (not finished, and probably never will)");
         Option outputPlain = new Option("y", OUTPUT_PLAIN, false, "will use simple palintext output (default out of terminal)");
         Option archives = new Option("z", ARCHIVES, false, "will ignore items from archvies from search results");
+        Option pdfInfo = new Option("P", noPdfInfo, false, "will not print info from pdfs");
 
         Option search = new Option("q", QUERY, true, "is considered default when no argument is given. Search docs. '-' connected wth word is NOT.");
         Option engine = new Option("e", PRINT_ENGINE, false, "will print out firefox's search engine to be used as firefox plugin");
@@ -111,6 +113,7 @@ public class Commandline implements SearchSettings {
         options.addOption(recordsOpt);
         options.addOption(archives);
         options.addOption(engine);
+        options.addOption(pdfInfo);
         this.args = args;
 
     }
@@ -256,6 +259,11 @@ public class Commandline implements SearchSettings {
     @Override
     public boolean isOmitArchives() {
         return line.hasOption(ARCHIVES);
+    }
+    
+     @Override
+    public boolean isOmitPdfInfo() {
+        return line.hasOption(noPdfInfo);
     }
 
     public boolean isColoured() {

@@ -1,6 +1,5 @@
 package javadocofflinesearch.lucene;
 
-import javadocofflinesearch.htmlprocessing.XmledHtmlToText;
 import javadocofflinesearch.extensions.PagedScoreDocs;
 import javadocofflinesearch.extensions.Vocabulary;
 import java.io.File;
@@ -16,6 +15,7 @@ import java.util.List;
 import javadocofflinesearch.extensions.HrefCounter;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.formatters.Formatter;
+import javadocofflinesearch.htmlprocessing.StreamCrossroad;
 import javadocofflinesearch.tools.Setup;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -38,7 +38,7 @@ import org.apache.lucene.store.SimpleFSDirectory;
  */
 public class MainIndex {
 
-    private final XmledHtmlToText htmlizer;
+    private final StreamCrossroad streamizer;
     private final Vocabulary vocabualry;
     private final HrefCounter hc;
     private final File INDEX;
@@ -47,7 +47,7 @@ public class MainIndex {
         INDEX = new File(cache, "javadocIndex.index");
         this.hc = new HrefCounter(cache, config);
         this.vocabualry = new Vocabulary(cache);
-        this.htmlizer = new XmledHtmlToText(hc, vocabualry);
+        this.streamizer = new StreamCrossroad(hc, vocabualry);
     }
 
     public boolean checkInitialized() throws IOException {
@@ -87,7 +87,7 @@ public class MainIndex {
         //iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         try (IndexWriter writer = new IndexWriter(index, iwc)) {
-            SingleIndexer si = new SingleIndexer(writer, htmlizer);
+            SingleIndexer si = new SingleIndexer(writer, streamizer);
             si.run();
         }
     }
@@ -161,7 +161,11 @@ public class MainIndex {
                     f.title((i + 1), found.totalHits, doc.getTitle());
                     f.file(doc.getPath(), doc.getPage(), doc.getArr().score);
                     if (settings.isInfo()) {
-                        f.summary(doc.getPath(), queryString, settings.getInfoBefore(), settings.getInfoAfter());
+                        //notpdf OR
+                        //pdf+preview for pd allowed
+                        if ((!doc.getPath().toLowerCase().endsWith(".pdf")) || (doc.getPath().toLowerCase().endsWith(".pdf") && !settings.isOmitPdfInfo())) {
+                            f.summary(doc.getPath(), queryString, settings.getInfoBefore(), settings.getInfoAfter());
+                        }
                     }
                 }
             }

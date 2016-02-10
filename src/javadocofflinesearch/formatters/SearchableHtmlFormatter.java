@@ -21,6 +21,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     public static final String merge = "merge";
     public static final String query = "query";
     public static final String noInfo = "no-info";
+    public static final String showAlsoPdfInfo = "show-pdf-info";
 
     public static final String infoBefore = "infoBefore";
     public static final String infoAfter = "infoAfter";
@@ -84,7 +85,8 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("<span>");
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"page-index\" " + getCheckedPage() + "> use page index (it learns!)");
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"lucene-index\" " + getCheckedLucene() + "> use lucene index");
-        out.println("<input type=\"checkbox\" name=\"" + merge + "\" value=\"true\"  " + getCheckedMerge() + ">merge both indexes<br>");
+        out.println("<input type=\"checkbox\" name=\"" + merge + "\" value=\"true\"  " + getCheckedMerge() + ">merge both indexes");
+        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a><br/>");
         out.println("</span>");
         out.println("<span>");
         out.println("  <input type=\"text\" id='t1' name=\"" + query + "\" value=\"" + getQueryValue() + "\"   style=\"width:99%;\"/><br/>");
@@ -93,6 +95,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("<span onclick=\"document.getElementById('advanced').style.display = 'block'\" ondblclick=\"document.getElementById('advanced').style.display = 'none'\">Click for more settings:</span><br/>");
         out.println("<span id='advanced' style='display:none;float: right;'>");
         out.println("  <input type=\"checkbox\" name=\"" + noInfo + "\" value=\"true\" " + getWasInfoSelcted() + "/> hide text-out info<br/>");
+        out.println("  <input type=\"checkbox\" name=\"" + showAlsoPdfInfo + "\" value=\"true\" " + getWasshowAlsoPdfInfoSeelcted() + "/> load also info from pdfs<br/>");
         out.println("  <input type=\"text\"  id='t2' name=\"" + infoBefore + "\" value=\"" + wasInfoB() + "\"/> how much text to show before highlighted info<br/>");
         out.println("  <input type=\"text\"  id='t3' name=\"" + infoAfter + "\" value=\"" + wasInfoA() + "\"/> how much text to show after highlighted info<br/>");
         out.println("  <input type=\"text\"  id='t4' name=\"" + ddmDeadline + "\" value=\"" + wasDDD() + "\"/>if total-found is bigger then this number, `do you mean ` do not appear<br/>");
@@ -145,6 +148,15 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     private String getWasInfoSelcted() {
         if (defaults != null) {
             if (!defaults.isInfo()) {
+                return CHECKED;
+            }
+        }
+        return "";
+    }
+    
+     private String getWasshowAlsoPdfInfoSeelcted() {
+        if (defaults != null) {
+            if (!defaults.isOmitPdfInfo()) {
                 return CHECKED;
             }
         }
