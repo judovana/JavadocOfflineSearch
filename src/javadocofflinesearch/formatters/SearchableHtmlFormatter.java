@@ -64,7 +64,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
             int pages = (total / recordsPerPage) + 1;
             for (int i = 0; i < pages; i++) {
                 String nwq = "search?" + s.replaceAll(startAt + "=\\d*", startAt + "=" + (i * (defaults.getRecords())))+"&"+bypage+"=true";
-                if (i * (defaults.getRecords()) == from) {
+                if (i * (defaults.getRecords()) >= from && i * (defaults.getRecords()) < to) {
                      out.println("<b> " + (i + 1) + " </b>");
                 } else {
                     out.println("<a href='" + nwq + "' > " + (i + 1) + " </a>");
