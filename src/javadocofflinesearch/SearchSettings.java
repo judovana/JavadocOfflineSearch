@@ -7,6 +7,7 @@ package javadocofflinesearch;
 
 import java.io.PrintStream;
 import javadocofflinesearch.formatters.Formatter;
+import javadocofflinesearch.tools.LibrarySetup;
 
 /**
  *
@@ -39,4 +40,7 @@ public interface SearchSettings {
     public boolean isOmitPdfInfo();
 
     public String getLibrary();
+
+    public LibrarySetup getSetup();
+    
 }

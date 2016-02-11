@@ -50,18 +50,16 @@ public class LibrarySetup implements IndexerSettings {
 
     public static String configName = "javadocOfflineSearch.properties";
 
-    private final File MAIN_CONFIG;
+    private final File settingsFile;
     private final Properties p = new Properties();
     private final LibrarySetup parent;
+    private final File cacheDir;
 
     public void preload() throws IOException {
         loadImpl();
     }
 
     public boolean isFileValid(String potentionalFile) {
-        if (!isSecurity()) {
-            return true;
-        }
         String[] l = getDirsString();
         for (String s : l) {
             if (potentionalFile.startsWith(s)) {
@@ -71,12 +69,23 @@ public class LibrarySetup implements IndexerSettings {
         return false;
     }
 
-    public File getMAIN_CONFIG() {
-        return MAIN_CONFIG;
+    public File settingsFile() {
+        return settingsFile;
+    }
+    
+    public File getConfigHome() {
+        return settingsFile.getParentFile();
+    }
+    
+    public File getCacheHome() {
+        return cacheDir;
     }
 
-    LibrarySetup(File CONFIG, LibrarySetup parent) {
-        MAIN_CONFIG = new File(CONFIG, configName);
+    LibrarySetup(File CONFIG, File CACHE, LibrarySetup parent) {
+        CONFIG.mkdirs();
+        CACHE.mkdirs();
+        this.cacheDir = CACHE;
+        settingsFile = new File(CONFIG, configName);
         this.parent = parent;
 
     }
@@ -96,10 +105,10 @@ public class LibrarySetup implements IndexerSettings {
             return;
         }
         loaded = true;
-        if (MAIN_CONFIG.exists()) {
-            p.load(new InputStreamReader(new FileInputStream(MAIN_CONFIG)));
+        if (settingsFile.exists()) {
+            p.load(new InputStreamReader(new FileInputStream(settingsFile)));
         } else {
-            System.out.println(MAIN_CONFIG.getAbsoluteFile() + " dont exists. Creating with defaults.");
+            System.out.println(settingsFile.getAbsoluteFile() + " dont exists. Creating with defaults.");
             if (parent != null) {
                 //to the "son" we put only where to search
                 p.setProperty(DIRS, VALUE);
@@ -125,7 +134,7 @@ public class LibrarySetup implements IndexerSettings {
                 p.setProperty(DEF_OW_previewMaxLoad, String.valueOf(HardcodedDefaults.infoLoad));
                 p.setProperty(DEF_OW_previewMaxShow, String.valueOf(HardcodedDefaults.infoShow));
             }
-            p.store(new FileOutputStream(MAIN_CONFIG), "All lists are semicolon separated. When security is true, server is not returning not-inidexed files.");
+            p.store(new FileOutputStream(settingsFile), "All lists are semicolon separated. When security is true, server is not returning not-inidexed files. Security cant be overwritten in per-library properties");
         }
         if (parent != null) {
             parent.loadImpl();

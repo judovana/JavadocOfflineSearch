@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.util.Date;
 import javadocofflinesearch.server.WebParams;
 import javadocofflinesearch.tools.Commandline;
+import javadocofflinesearch.tools.LibrarySetup;
 
 /**
  *
@@ -23,6 +24,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     public static final String previewMaxLoad = "previewMaxLoad";
     public static final String merge = Commandline.MERGE_COMAPRATORS;
     public static final String query = Commandline.QUERY;
+    public static final String library = Commandline.LIBRARY;
     public static final String noInfo = Commandline.NO_INFO;
     public static final String showAlsoPdfInfo = "xnot-" + Commandline.NO_PDF_INFO;
 
@@ -37,13 +39,13 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     //special field to reset item to start form when clicekd via "pages link"
     public static final String bypage = "bypage";
 
-    public SearchableHtmlFormatter(PrintStream out) {
-        super(out);
+    public SearchableHtmlFormatter(PrintStream out, LibrarySetup setup) {
+        super(out, setup);
         this.defaults = null;
     }
 
     public SearchableHtmlFormatter(PrintStream out, WebParams defaults) {
-        super(out);
+        super(out, defaults.getSetup());
         this.defaults = defaults;
     }
 
@@ -122,7 +124,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
                 return "";
             }
         }
-        if (HardcodedDefaults.isLuceneByDefault()) {
+        if (setup.isLucenePreffered()) {
             return CHECKED;
         }
         return "";
@@ -136,7 +138,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
                 return "";
             }
         }
-        if (!HardcodedDefaults.isLuceneByDefault()) {
+        if (!setup.isLucenePreffered()) {
             return CHECKED;
         }
         return "";
@@ -155,21 +157,21 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         if (defaults != null) {
             return defaults.getDidYouMeantDeadLine() + "";
         }
-        return HardcodedDefaults.getDidYouMeantDeadLine() + "";
+        return setup.getDidYouMeantDeadLine() + "";
     }
 
     private String wasDDC() {
         if (defaults != null) {
             return defaults.getDidYouMeantCount() + "";
         }
-        return HardcodedDefaults.getDidYouMeantCount() + "";
+        return setup.getDidYouMeantCount() + "";
     }
 
     private String wasRecords() {
         if (defaults != null) {
             return defaults.getRecords() + "";
         }
-        return HardcodedDefaults.getShowRecordsDefault() + "";
+        return setup.getShowRecords() + "";
     }
 
     private String wasStartAt() {
@@ -183,28 +185,28 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         if (defaults != null) {
             return defaults.getInfoAfter() + "";
         }
-        return HardcodedDefaults.getDefaultAfter() + "";
+        return setup.getShowAfter() + "";
     }
 
     private String wasInfoB() {
         if (defaults != null) {
             return defaults.getInfoBefore() + "";
         }
-        return HardcodedDefaults.getDefaultBefore() + "";
+        return setup.getShowBefore() + "";
     }
 
     private String wasMS() {
         if (defaults != null) {
             return defaults.getInfoShow() + "";
         }
-        return HardcodedDefaults.getInfoShow() + "";
+        return setup.getMaxShow() + "";
     }
 
     private String wasML() {
         if (defaults != null) {
             return defaults.getInfoLoad() + "";
         }
-        return HardcodedDefaults.getInfoLoad() + "";
+        return setup.getMaxLoad() + "";
     }
 
     public WebParams getDefaults() {
@@ -212,7 +214,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     }
 
     private String getMergeText() {
-        if (HardcodedDefaults.isMergeResults()) {
+        if (setup.isMergeResults()) {
             return "don't merge results";
         } else {
             return "merge both indexes";
@@ -221,7 +223,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     }
 
     private String getInfoText() {
-        if (HardcodedDefaults.isNoInfo()) {
+        if (setup.isNoInfo()) {
             return "show text-out info";
         } else {
             return "hide text-out info";
@@ -229,7 +231,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     }
 
     private String getPdfText() {
-        if (HardcodedDefaults.isNoPdfInfo()) {
+        if (setup.isNoPdfInfo()) {
             return "load also info from pdfs";
         } else {
             return "dont load info from pdfs";
@@ -244,7 +246,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
                 return "";
             }
         }
-        if (HardcodedDefaults.isNoInfo()) {
+        if (setup.isNoInfo()) {
             return "";
         }
         return CHECKED;
@@ -258,7 +260,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
                 return "";
             }
         }
-        if (HardcodedDefaults.isMergeResults()) {
+        if (setup.isMergeResults()) {
             return CHECKED;
         }
         return "";
@@ -272,7 +274,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
                 return "";
             }
         }
-        if (!HardcodedDefaults.isNoPdfInfo()) {
+        if (!setup.isNoPdfInfo()) {
             return CHECKED;
         }
         return "";

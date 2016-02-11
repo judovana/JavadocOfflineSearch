@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.io.PrintStream;
 import java.util.List;
 import javadocofflinesearch.lucene.InfoExtractor;
+import javadocofflinesearch.tools.LibrarySetup;
 
 /**
  *
@@ -17,9 +18,13 @@ import javadocofflinesearch.lucene.InfoExtractor;
 public class ColoredPlainTextFormatter implements Formatter {
 
     private final PrintStream out;
+    private final LibrarySetup setup;
+    private final InfoExtractor infoExtractor;
 
-    public ColoredPlainTextFormatter(PrintStream out) {
+    public ColoredPlainTextFormatter(PrintStream out, LibrarySetup setup) {
         this.out = out;
+        this.setup = setup;
+        infoExtractor = new InfoExtractor(setup);
     }
 
     @Override
@@ -146,7 +151,7 @@ public class ColoredPlainTextFormatter implements Formatter {
     public void summary(String path, String queryString, int infoBefore, int infoAfter) {
         String sumamry = "";
         try {
-            sumamry = InfoExtractor.extract(path, queryString, this, infoBefore, infoAfter);
+            sumamry = infoExtractor.extract(path, queryString, this, infoBefore, infoAfter);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -165,6 +170,11 @@ public class ColoredPlainTextFormatter implements Formatter {
 
     @Override
     public void pages(int from, int to, int total) {
-        
+
+    }
+
+    @Override
+    public void printLibrary(String library) {
+        out.println("Using library: "+colorToEscapedString(Color.GREEN, true) + library + reset(true));
     }
 }

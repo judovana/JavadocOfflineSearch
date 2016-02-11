@@ -67,7 +67,7 @@ public class Commandline implements SearchSettings {
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
-        Option index = new Option("i", INDEX, false, "will index directories specified in config file");
+        Option index = new Option("i", INDEX, false, "will index directories specified in config file. If config file for given library does not exists, you must specify the files on commandline");
         Option version = new Option("v", VERSION, false, "print the version information and exit");
         Option pagerank = new Option("p", PAGE_RANK, false, "will use page-rank for sorting before lucene one");
         Option lucenerank = new Option("l", LUCENE_RANK, false, "will use default lucene ranking");
@@ -216,6 +216,7 @@ public class Commandline implements SearchSettings {
     }
 
     public void verifyIndex() {
+        //FIXME-include query+configFile verification
         if (line.hasOption(INDEX) && line.hasOption(LIBRARY) && args.length != 3) {
             System.out.println("when " + INDEX + " is used with " + LIBRARY + " then line must have exactly three argments - index, library and name of library");
             System.exit(1);
@@ -428,6 +429,7 @@ public class Commandline implements SearchSettings {
     }
 
     public void checkAll() {
+        //FIXME  pouze pri index umoznit neexistujici library
         Commandline cmds = this;
         cmds.checkHelp();
         cmds.checkVersion();
@@ -479,18 +481,18 @@ public class Commandline implements SearchSettings {
     @Override
     public Formatter createFormatter(PrintStream out) {
         if (isPlain()) {
-            return new PlainTextFormatter(out);
+            return new PlainTextFormatter(out, this.getSetup());
         } else if (isColoured()) {
-            return new ColoredPlainTextFormatter(out);
+            return new ColoredPlainTextFormatter(out, this.getSetup());
         } else if (isHtml()) {
-            return new StaticHtmlFormatter(out);
+            return new StaticHtmlFormatter(out, this.getSetup());
         } else if (isAjax()) {
-            return new AjaxHtmlFormatter(out);
+            return new AjaxHtmlFormatter(out, this.getSetup());
         } else {
             if (System.console() == null || isWindows()) {
-                return new PlainTextFormatter(out);
+                return new PlainTextFormatter(out, this.getSetup());
             } else {
-                return new ColoredPlainTextFormatter(out);
+                return new ColoredPlainTextFormatter(out, this.getSetup());
             }
 
         }
@@ -534,7 +536,8 @@ public class Commandline implements SearchSettings {
         }
     }
 
-    private LibrarySetup getSetup() {
+    @Override
+    public  LibrarySetup getSetup() {
         return LibraryManager.getLibraryManager().getLibrarySetup(getLibrary());
     }
 

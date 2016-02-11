@@ -37,16 +37,8 @@
 package javadocofflinesearch.server;
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import javadocofflinesearch.lucene.MainIndex;
-import javadocofflinesearch.tools.Setup;
 
 /**
  * wrapper around tiny http server to separate lunch configurations and servers.
@@ -79,10 +71,9 @@ public class ServerLauncher implements Runnable {
     public void run() {
         running = true;
         try {
-            MainIndex mainIndex = new MainIndex(cache, config);
             serverSocket = new ServerSocket(port);
             while (running) {
-                TinyHttpdImpl server = new TinyHttpdImpl(serverSocket.accept(), false, mainIndex);
+                TinyHttpdImpl server = new TinyHttpdImpl(serverSocket.accept(), false);
                 server.start();
             }
         } catch (Exception e) {

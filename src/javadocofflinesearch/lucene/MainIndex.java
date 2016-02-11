@@ -42,12 +42,14 @@ public class MainIndex {
     private final HrefCounter hc;
     private final File INDEX;
     public static final String mainIndexName = "javadocIndex.index";
+    private final SearchSettings settings;
 
-    public MainIndex(File cache, File config) throws IOException {
-        INDEX = new File(cache, mainIndexName);
-        this.hc = new HrefCounter(cache, config);
-        this.vocabualry = new Vocabulary(cache);
+    public MainIndex(SearchSettings settings) throws IOException {
+        INDEX = new File(settings.getSetup().getCacheHome(), mainIndexName);
+        this.hc = new HrefCounter(settings.getSetup().getCacheHome());
+        this.vocabualry = new Vocabulary(settings.getSetup().getCacheHome());
         this.streamizer = new StreamCrossroad(hc, vocabualry);
+        this.settings=settings;
     }
 
     public boolean checkInitialized() throws IOException {
@@ -69,7 +71,7 @@ public class MainIndex {
         s += "Your documents were probably not yet indexed or are corrupted\n";
         s += "Run `java -jar JavadocOfflineSearch.jar - index` to fix: \n";
         s += INDEX.getAbsolutePath() + " - " + INDEX.exists() + "\n";
-        s += hc.getFile1().getAbsolutePath() + " records: " + hc.size() + "\n";
+        s += hc.getFile().getAbsolutePath() + " records: " + hc.size() + "\n";
         s += vocabualry.getFile().getAbsolutePath() + " records: " + vocabualry.size() + "\n";
         s += "Your may also check content of:\n";
         s += javadocofflinesearch.JavadocOfflineSearch.CONFIG + "\n";
@@ -77,7 +79,7 @@ public class MainIndex {
     }
 
     public void index() throws IOException {
-        index(Setup.getSetup().getDirs());
+        index(settings.getSetup().getDirs());
     }
 
     private void index(Path... sources) throws IOException {
@@ -87,7 +89,7 @@ public class MainIndex {
         //iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         try (IndexWriter writer = new IndexWriter(index, iwc)) {
-            SingleIndexer si = new SingleIndexer(writer, streamizer);
+            SingleIndexer si = new SingleIndexer(writer, streamizer, settings);
             si.run();
         }
     }
@@ -110,6 +112,7 @@ public class MainIndex {
             Query query = parser.parse(queryString);
 
             f.searchStarted("Searching for: ", query.toString(field));
+            f.printLibrary(settings.getLibrary());
 
             Date start = new Date();
             TopDocs found = searcher.search(query, Integer.MAX_VALUE);
@@ -177,15 +180,5 @@ public class MainIndex {
         }
     }
 
-    public synchronized void clickedHrefTo(String absolutePath) {
-        try {
-            if (absolutePath.toLowerCase().endsWith(".html") && hc.size() > 0) {
-                hc.addLink(absolutePath, new URL(absolutePath), true);
-                hc.saveCustom();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
 }

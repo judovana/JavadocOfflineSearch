@@ -48,10 +48,13 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.tools.LevenshteinDistance;
+import javadocofflinesearch.tools.LibraryManager;
 
 /**
  * based on http://www.mcwalter.org/technology/java/httpd/tiny/index.html Very
@@ -71,16 +74,11 @@ public class TinyHttpdImpl extends Thread {
     boolean canRun = true;
     private static long requests = 0;
 
-    private Socket socket;
-    private MainIndex mainIndex;
+    private final Socket socket;
+    private static final Map<String, MainIndex> mainIndexes = new HashMap<>();
 
-    public TinyHttpdImpl(Socket socket) {
-
-    }
-
-    public TinyHttpdImpl(Socket socket, boolean start, MainIndex mainIndex) {
+    public TinyHttpdImpl(Socket socket, boolean start) {
         this.socket = socket;
-        this.mainIndex = mainIndex;
         if (start) {
             start();
         }
@@ -129,7 +127,7 @@ public class TinyHttpdImpl extends Thread {
 
                     if (isGetRequest) {
                         if (filePath.trim().length() <= 1) {
-                            SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer);
+                            SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer, LibraryManager.getLibraryManager().getLibrarySetup(null));
                             contentType = "Content-Type: ";
                             contentType += "text/html";
                             contentType += CRLF;
@@ -153,7 +151,7 @@ public class TinyHttpdImpl extends Thread {
                             }
                             if (decodingStream != null) {
                                 try {
-                                    if (!Setup.getSetup().isFileValid(potentionalFile)) {
+                                    if (!LibraryManager.getLibraryManager().isFileValid(potentionalFile)) {
                                         System.out.println("Security blocked " + potentionalFile + " from showing.");
                                         throw new SecurityException("Sorry, security is on");
                                     }
@@ -174,7 +172,7 @@ public class TinyHttpdImpl extends Thread {
                                         contentType += CRLF;
                                     }
                                     //this is learning, more this hreff is clicked, more is recorded
-                                    mainIndex.clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
+                                    LibraryManager.getLibraryManager().clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
                                     byte[] buff = streamToBYteArray(decodingStream);
 
                                     String lastModified = "Last-Modified: " + new Date() + CRLF;
@@ -189,7 +187,13 @@ public class TinyHttpdImpl extends Thread {
                                 contentType += "text/html";
                                 contentType += CRLF;
                                 writer.print(HTTP_OK + contentType + CRLF);
+                                MainIndex mainIndex = mainIndexes.get(cmds.getLibrary());
+                                if (mainIndex == null) {
+                                    mainIndex = new MainIndex(cmds);
+                                    mainIndexes.put(cmds.getLibrary(), mainIndex);
+                                }
                                 if (!mainIndex.checkInitialized()) {
+                                    cmds.createFormatter(System.out).printLibrary(cmds.getLibrary());
                                     cmds.createFormatter(writer).initializationFailed(mainIndex.printInitialized());
                                 } else {
 

@@ -5,9 +5,11 @@
  */
 package javadocofflinesearch.formatters;
 
+import java.awt.Color;
 import java.io.PrintStream;
 import java.util.List;
 import javadocofflinesearch.lucene.InfoExtractor;
+import javadocofflinesearch.tools.LibrarySetup;
 
 /**
  *
@@ -17,9 +19,13 @@ public class StaticHtmlFormatter implements Formatter {
 
     protected final PrintStream out;
     private static final boolean cdata = false;
+    protected final InfoExtractor infoExtractor;
+    protected final LibrarySetup setup;
 
-    public StaticHtmlFormatter(PrintStream out) {
+    public StaticHtmlFormatter(PrintStream out, LibrarySetup setup) {
         this.out = out;
+        this.setup = setup;
+        infoExtractor = new InfoExtractor(setup);
     }
 
     @Override
@@ -113,7 +119,7 @@ public class StaticHtmlFormatter implements Formatter {
         String sumamry;
         out.println("<div>");
         try {
-            sumamry = InfoExtractor.extract(path, queryString, this, infoBefore, infoAfter);
+            sumamry = infoExtractor.extract(path, queryString, this, infoBefore, infoAfter);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -141,7 +147,12 @@ public class StaticHtmlFormatter implements Formatter {
 
     @Override
     public void pages(int from, int to, int total) {
-        
+
+    }
+
+    @Override
+    public void printLibrary(String library) {
+        out.println("Using library: " + "<b>" + library + "</b><br/>");
     }
 
 }

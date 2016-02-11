@@ -38,4 +38,6 @@ public interface Formatter {
     
     public void pages(int from, int to, int total);
     
+    void printLibrary(String library);
+    
 }

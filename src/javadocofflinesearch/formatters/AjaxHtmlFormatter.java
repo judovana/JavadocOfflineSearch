@@ -6,25 +6,25 @@
 package javadocofflinesearch.formatters;
 
 import java.io.PrintStream;
-
+import javadocofflinesearch.tools.LibrarySetup;
 
 /**
- *Was intended to dont include the extracted testxts, but without content length browsers do ojust ok. so no need to implement this ever.
- * 
+ * Was intended to dont include the extracted testxts, but without content
+ * length browsers do ojust ok. so no need to implement this ever.
+ *
  * @author jvanek
  */
-public class AjaxHtmlFormatter extends SearchableHtmlFormatter{
+public class AjaxHtmlFormatter extends SearchableHtmlFormatter {
 
-    public AjaxHtmlFormatter(PrintStream out) {
-        super(out);
+    public AjaxHtmlFormatter(PrintStream out, LibrarySetup setup) {
+        super(out, setup);
     }
-    
-     @Override
+
+    @Override
     public void summary(String path, String queryString, int infoBefore, int infoAfter) {
         out.println("<div>");
         out.println("strange query to server");
         out.println("</div>");
     }
- 
-    
+
 }

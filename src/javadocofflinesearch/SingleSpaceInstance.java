@@ -19,23 +19,23 @@ import javadocofflinesearch.tools.LibraryManager;
  * @author jvanek
  */
 public class SingleSpaceInstance {
-
+    
     private final File cache;
     private final Commandline cmds;
     private final File config;
-
+    
     SingleSpaceInstance(File CONFIG, File CACHE, Commandline cmds) {
         cache = CACHE;
         config = CONFIG;
         LibraryManager.createtLibraryManager(config, cache);
         this.cmds = cmds;
     }
-
+    
     void run() {
         try {
             LibraryManager.getLibraryManager().preload();
             if (cmds.hasServer()) {
-                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT,  cache, config);
+                ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT, cache, config);
                 Thread r = new Thread(lServerLuncher);
                 r.setDaemon(true);
                 r.start();
@@ -47,13 +47,14 @@ public class SingleSpaceInstance {
             } else if (cmds.hasPrintFirefoxEngine()) {
                 printFirefox();
             } else {
-                MainIndex mainIndex = new MainIndex(cache, config);
+                MainIndex mainIndex = new MainIndex(cmds);
                 if (cmds.hasIndex()) {
                     mainIndex.index();
                     installFirefox();
                     return;
                 }
                 if (!mainIndex.checkInitialized()) {
+                    cmds.createFormatter(System.out).printLibrary(cmds.getLibrary());
                     cmds.createFormatter(System.out).initializationFailed(mainIndex.printInitialized());
                     System.exit(10);
                 }
@@ -63,9 +64,9 @@ public class SingleSpaceInstance {
             throw new RuntimeException(e);
         }
     }
-
+    
     private static final String PLUGIN = "javadocOfflineSearch.xml";
-
+    
     private void printFirefox() throws IOException {
         InputStream in = getClass().getResourceAsStream("/javadocofflinesearch/" + PLUGIN);
         try (BufferedReader input = new BufferedReader(new InputStreamReader(in))) {
@@ -101,7 +102,7 @@ public class SingleSpaceInstance {
             }
         }
     }
-
+    
     private void installFirefox() throws IOException {
         StringBuilder sb = new StringBuilder();
         InputStream in = getClass().getResourceAsStream("/javadocofflinesearch/" + PLUGIN);
@@ -147,5 +148,5 @@ public class SingleSpaceInstance {
             }
         }
     }
-
+    
 }

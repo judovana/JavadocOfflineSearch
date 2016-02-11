@@ -10,6 +10,9 @@ import java.net.URLDecoder;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.formatters.Formatter;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
+import javadocofflinesearch.tools.Commandline;
+import javadocofflinesearch.tools.LibraryManager;
+import javadocofflinesearch.tools.LibrarySetup;
 
 /**
  *
@@ -28,6 +31,8 @@ public class WebParams implements SearchSettings {
     private boolean wasFromPage = false;
 
     private final String origQuery;
+
+    private String library = Commandline.DEFAULT_LIBRARY;
 
     private Integer infoBefore;
     private Integer infoAfter;
@@ -55,6 +60,8 @@ public class WebParams implements SearchSettings {
             } else {
                 if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.query)) {
                     this.query = decode(pair[1]);
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.library)) {
+                    this.library = decode(pair[1]);
                 } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.searchType)) {
                     if (pair[1].equalsIgnoreCase("lucene-index")) {
                         lucene = true;
@@ -140,7 +147,7 @@ public class WebParams implements SearchSettings {
         if (lucene != null) {
             return !lucene;
         }
-        return !HardcodedDefaults.isLuceneByDefault();
+        return !getSetup().isLucenePreffered();
     }
 
     /**
@@ -163,7 +170,7 @@ public class WebParams implements SearchSettings {
     @Override
     public int getInfoBefore() {
         if (infoBefore == null) {
-            return -Math.abs(HardcodedDefaults.getDefaultBefore());
+            return -Math.abs(getSetup().getShowBefore());
         } else {
             return -Math.abs(infoBefore);
         }
@@ -172,7 +179,7 @@ public class WebParams implements SearchSettings {
     @Override
     public int getInfoAfter() {
         if (infoAfter == null) {
-            return HardcodedDefaults.getDefaultAfter();
+            return getSetup().getShowAfter();
         } else {
             return infoAfter;
         }
@@ -181,7 +188,7 @@ public class WebParams implements SearchSettings {
     @Override
     public int getDidYouMeantDeadLine() {
         if (ddmDeadline == null) {
-            return HardcodedDefaults.getDidYouMeantDeadLine();
+            return getSetup().getDidYouMeantDeadLine();
         } else {
             return ddmDeadline;
         }
@@ -190,7 +197,7 @@ public class WebParams implements SearchSettings {
     @Override
     public int getDidYouMeantCount() {
         if (ddmCount == null) {
-            return HardcodedDefaults.getDidYouMeantCount();
+            return getSetup().getDidYouMeantCount();
         } else {
             return ddmCount;
         }
@@ -208,7 +215,7 @@ public class WebParams implements SearchSettings {
     @Override
     public int getRecords() {
         if (records == null) {
-            return HardcodedDefaults.getShowRecordsDefault();
+            return getSetup().getShowRecords();
         } else {
             return records;
         }
@@ -235,7 +242,7 @@ public class WebParams implements SearchSettings {
     public Integer getInfoLoad() {
 
         if (infoLoad == null) {
-            return HardcodedDefaults.getInfoLoad();
+            return getSetup().getMaxLoad();
         } else {
             return infoLoad;
         }
@@ -243,7 +250,7 @@ public class WebParams implements SearchSettings {
 
     public Integer getInfoShow() {
         if (infoShow == null) {
-            return HardcodedDefaults.getInfoShow();
+            return getSetup().getMaxShow();
         } else {
             return infoShow;
         }
@@ -260,15 +267,13 @@ public class WebParams implements SearchSettings {
     public boolean isNegatePdf() {
         return negatePdf;
     }
-    
-    
 
     @Override
     public boolean isInfo() {
         if (negateInfo) {
-            return HardcodedDefaults.isNoInfo();
+            return getSetup().isNoInfo();
         } else {
-            return !HardcodedDefaults.isNoInfo();
+            return !getSetup().isNoInfo();
         }
 
     }
@@ -276,24 +281,32 @@ public class WebParams implements SearchSettings {
     @Override
     public boolean isOmitPdfInfo() {
         if (negatePdf) {
-            return !HardcodedDefaults.isNoPdfInfo();
+            return !getSetup().isNoPdfInfo();
         } else {
-            return HardcodedDefaults.isNoPdfInfo();
+            return getSetup().isNoPdfInfo();
         }
     }
 
     @Override
     public boolean isMergeWonted() {
         if (negateMerge) {
-            return !HardcodedDefaults.isMergeResults();
+            return !getSetup().isMergeResults();
         } else {
-            return HardcodedDefaults.isMergeResults();
+            return getSetup().isMergeResults();
         }
     }
 
     @Override
     public String getLibrary() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (library == null) {
+            return Commandline.DEFAULT_LIBRARY;
+        }
+        return library;
+    }
+
+    @Override
+    public LibrarySetup getSetup() {
+        return LibraryManager.getLibraryManager().getLibrarySetup(getLibrary());
     }
 
 }

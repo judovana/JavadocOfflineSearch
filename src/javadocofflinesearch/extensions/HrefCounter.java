@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javadocofflinesearch.tools.LevenshteinDistance;
+import javadocofflinesearch.tools.LibraryManager;
 
 /**
  *
@@ -26,32 +27,21 @@ import javadocofflinesearch.tools.LevenshteinDistance;
 public class HrefCounter {
 
     private final Map<String, Integer> priorities = new HashMap<>();
-    private final Map<String, Integer> customClicks = new HashMap<>();
 
-    private final File file1;
-    private final File file2;
+    private final File file;
     public static final String customClicksName = "customClicks";
     public static final String pageIndexName = "pageIndex";
 
-    public File getFile1() {
-        return file1;
+    public File getFile() {
+        return file;
     }
 
-    public File getFile2() {
-        return file2;
-    }
-
-    public HrefCounter(File cache, File config) {
-        this.file1 = new File(cache, pageIndexName);
-        this.file2 = new File(config, customClicksName);
+    public HrefCounter(File target) {
+        this.file = new File(target, pageIndexName);
     }
 
     public void countPoints(String s) {
         countPoints(s, 1, priorities);
-    }
-
-    public void customClick(String s) {
-        countPoints(s, 10, customClicks);
     }
 
     private static void countPoints(String s, int val, Map<String, Integer> where) {
@@ -66,11 +56,7 @@ public class HrefCounter {
     }
 
     public void saveHrefs() throws IOException {
-        saveHrefs(file1, priorities);
-    }
-
-    public void saveCustom() throws IOException {
-        saveHrefs(file2, customClicks);
+        saveHrefs(file, priorities);
     }
 
     private static void saveHrefs(File f, Map<String, Integer> where) throws IOException {
@@ -86,8 +72,7 @@ public class HrefCounter {
     }
 
     public void loadHrefs() throws IOException {
-        loadHrefs(file1, true, priorities);
-        loadHrefs(file2, true, customClicks);
+        loadHrefs(file, true, priorities);
     }
 
     private static void loadHrefs(File f, boolean clear, Map<String, Integer> where) throws IOException {
@@ -104,7 +89,7 @@ public class HrefCounter {
                     return;
                 }
                 int i = s.lastIndexOf(" ");
-                where.put(s.substring(0,i).trim(), Integer.valueOf(s.substring(i).trim()));
+                where.put(s.substring(0, i).trim(), Integer.valueOf(s.substring(i).trim()));
             }
         }
     }
@@ -114,7 +99,7 @@ public class HrefCounter {
         if (p1 == null) {
             p1 = 0;
         }
-        Integer p = customClicks.get(path);
+        Integer p = LibraryManager.getLibraryManager().getCustomClicks().priorities.get(path); //direct call to priorities to avoid recursion
         if (p == null) {
             p = 0;
         }
@@ -143,11 +128,8 @@ public class HrefCounter {
                 s = absolutizeLink(s, current);
             }
         }
-        if (customClick) {
-            customClick(s);
-        } else {
-            countPoints(s);
-        }
+
+        countPoints(s);
     }
 
     private static String absolutizeLink(String s, URL current) {
