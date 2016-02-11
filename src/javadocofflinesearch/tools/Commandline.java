@@ -5,7 +5,10 @@
  */
 package javadocofflinesearch.tools;
 
+import java.io.File;
 import java.io.PrintStream;
+import java.util.List;
+import java.util.Set;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.JavadocOfflineSearch;
 import javadocofflinesearch.formatters.AjaxHtmlFormatter;
@@ -57,7 +60,10 @@ public class Commandline implements SearchSettings {
     public static final String RECORDS = "records";
     private static final String ARCHIVES = "omit-archives";
     private static final String PRINT_ENGINE = "print-engine";
-    public static final String NO_PDF_INFO = "no-pdf-info"; 
+    public static final String NO_PDF_INFO = "no-pdf-info";
+    public static final String LIBRARY = "library";
+    public static final String LIBRARIES = "libraries";
+    public static final String DEFAULT_LIBRARY = "default";
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -70,18 +76,20 @@ public class Commandline implements SearchSettings {
         Option server = new Option("s", START_SERVER, false, "will start the server on port 31745. You can then search in browser by http://lcoalhost:" + JavadocOfflineSearch.PORT);
         Option merge = new Option("g", MERGE_COMAPRATORS, false, "will use both lucene and page sorting to determine results");
         Option exInfo = new Option("x", EXTRACT_INFO, true, "from given document, extract those ...info...  based on query");
-        Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + HardcodedDefaults.getDefaultBefore());
-        Option infoAfter = new Option("A", INFO_AFTER, true, "number of characters between 'match' and '...'. default " + HardcodedDefaults.getDefaultAfter());
-        Option didDead = new Option("d", DEAD_LINE, true, "min. number of result to occure before 'did you ment' is suggested. default " + HardcodedDefaults.getDidYouMeantDeadLine());
-        Option didCount = new Option("D", DID_COUNT, true, "how meny 'did you ment' is suggested. default " + HardcodedDefaults.getDidYouMeantCount());
+        Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + LibrarySetup.HardcodedDefaults.defaultBefore);
+        Option infoAfter = new Option("A", INFO_AFTER, true, "number of characters between 'match' and '...'. default " + LibrarySetup.HardcodedDefaults.defaultAfter);
+        Option didDead = new Option("d", DEAD_LINE, true, "min. number of result to occure before 'did you ment' is suggested. default " + LibrarySetup.HardcodedDefaults.didYouMeantDeadLine);
+        Option didCount = new Option("D", DID_COUNT, true, "how meny 'did you ment' is suggested. default " + LibrarySetup.HardcodedDefaults.didYouMeantCount);
         Option startAtOpt = new Option("R", START_AT, true, "start at record #number. Default  " + startAtDefault);
-        Option recordsOpt = new Option("r", RECORDS, true, "show number of recods #number. Default  " + HardcodedDefaults.getShowRecordsDefault());
+        Option recordsOpt = new Option("r", RECORDS, true, "show number of recods #number. Default  " + LibrarySetup.HardcodedDefaults.showRecordsDefault);
         Option outputColor = new Option("c", OUTPUT_COLOUR, false, "will use colored shell output (default in terminal)");
         Option outputHtml = new Option("t", OUTPUT_HTML, false, "will force html marked up output");
         Option outputAjax = new Option("a", OUTPUT_AJAX, false, "will force html marked up with ajax info snippets (not finished, and probably never will)");
         Option outputPlain = new Option("y", OUTPUT_PLAIN, false, "will use simple palintext output (default out of terminal)");
         Option archives = new Option("z", ARCHIVES, false, "will ignore items from archvies from search results");
         Option pdfInfo = new Option("P", NO_PDF_INFO, false, "will not print info from pdfs");
+        Option library = new Option("L", LIBRARY, true, " will index into /search in  specified library. If not set 'default' is used");
+        Option libraries = new Option(LIBRARIES, false, " list avaible libraries");
 
         Option search = new Option("q", QUERY, true, "is considered default when no argument is given. Search docs. '-' connected wth word is NOT.");
         Option engine = new Option("e", PRINT_ENGINE, false, "will print out firefox's search engine to be used as firefox plugin");
@@ -111,6 +119,8 @@ public class Commandline implements SearchSettings {
         options.addOption(archives);
         options.addOption(engine);
         options.addOption(pdfInfo);
+        options.addOption(library);
+        options.addOption(libraries);
         this.args = args;
 
     }
@@ -137,6 +147,50 @@ public class Commandline implements SearchSettings {
 
     }
 
+    private void checkLibraries() {
+        if (line.hasOption(LIBRARIES)) {
+            Set<String> merged = JavadocOfflineSearch.listLibraries();
+            List<String> configList = JavadocOfflineSearch.getConigLIbraries();
+            List<String> cacheList = JavadocOfflineSearch.getCacheLIbraries();
+            if (merged.isEmpty()) {
+                System.out.println("No library found. You did not run -index yet");
+            } else {
+                //first verify files
+                System.out.println("    Files sanity:");
+                for (String library : merged) {
+                    verify(library);
+                }
+                //second only invalid libraries
+                System.out.println("    Possibly corrupted libraries:");
+                for (String library : merged) {
+                    if (configList.contains(library) && cacheList.contains(library)) {
+                        //System.out.println(library);
+                    } else if (!configList.contains(library) && cacheList.contains(library)) {
+                        System.out.println("WARNING only in cache folder - " + library);
+                    } else if (configList.contains(library) && !cacheList.contains(library)) {
+                        System.out.println("WARNING only in config folder - " + library);
+                    } else {
+                        System.out.println("Error, library from different planet - " + library);
+                    }
+                }
+                //last only valid libraries
+                System.out.println("    Libraries:");
+                for (String library : merged) {
+                    if (configList.contains(library) && cacheList.contains(library)) {
+                        System.out.println(library);
+                    } else if (!configList.contains(library) && cacheList.contains(library)) {
+                        //System.out.println("WARNING only in cache folder - " + library);
+                    } else if (configList.contains(library) && !cacheList.contains(library)) {
+                        //System.out.println("WARNING only in config folder - " + library);
+                    } else {
+                        //System.out.println("Error, library from different planet - " + library);
+                    }
+                }
+            }
+            System.exit(0);
+        }
+    }
+
     public void checkHelp() {
         if (line.hasOption(HELP)) {
             HelpFormatter formatter = new HelpFormatter();
@@ -146,7 +200,7 @@ public class Commandline implements SearchSettings {
             System.out.println("* java -jar JavadocOfflineSearch.jar -index");
             System.out.println("* java -jar JavadocOfflineSearch.jar  -query");
             System.out.println("* index all files in $XDG_CONFIG_DIR/JavadocOfflineSearch/javadocOfflineSearch.properties");
-            System.out.println("* by default " + Setup.VALUE);
+            System.out.println("* by default " + LibrarySetup.VALUE);
             System.out.println("to use firefox search plugin comaptible and/or commandline approach run:");
             System.out.println("* java -jar JavadocOfflineSearch.jar  -start-server & firefox");
 
@@ -162,7 +216,11 @@ public class Commandline implements SearchSettings {
     }
 
     public void verifyIndex() {
-        if (line.hasOption(INDEX) && args.length != 1) {
+        if (line.hasOption(INDEX) && line.hasOption(LIBRARY) && args.length != 3) {
+            System.out.println("when " + INDEX + " is used with " + LIBRARY + " then line must have exactly three argments - index, library and name of library");
+            System.exit(1);
+        }
+        if (line.hasOption(INDEX) && !line.hasOption(LIBRARY) && args.length != 1) {
             System.out.println(INDEX + " must be lone item.");
             System.exit(1);
         }
@@ -237,10 +295,10 @@ public class Commandline implements SearchSettings {
         if (hasPageRank()) {
             return true;
         }
-        if (hasLuceneRank()){
-        return false;
+        if (hasLuceneRank()) {
+            return false;
         }
-        return !HardcodedDefaults.isLuceneByDefault();
+        return !getSetup().isLucenePreffered();
     }
 
     @Override
@@ -248,38 +306,38 @@ public class Commandline implements SearchSettings {
         if (hasMoreInfo()) {
             return true;
         }
-        if (hasNoInfo()){
+        if (hasNoInfo()) {
             return false;
         }
-        return !HardcodedDefaults.isNoInfo();
+        return !getSetup().isNoInfo();
     }
 
-    
     public boolean hasMergeWonted() {
         return line.hasOption(MERGE_COMAPRATORS);
     }
+
     @Override
     public boolean isMergeWonted() {
-        if (hasMergeWonted()){
+        if (hasMergeWonted()) {
             return true;
         }
-        return HardcodedDefaults.isMergeResults();
+        return getSetup().isMergeResults();
     }
 
     @Override
     public boolean isOmitArchives() {
-        if (line.hasOption(ARCHIVES)){
+        if (line.hasOption(ARCHIVES)) {
             return true;
         }
-        return HardcodedDefaults.isOmitArchives();
+        return LibrarySetup.HardcodedDefaults.omitArchives;
     }
-    
-     @Override
+
+    @Override
     public boolean isOmitPdfInfo() {
-        if (line.hasOption(NO_PDF_INFO)){
+        if (line.hasOption(NO_PDF_INFO)) {
             return true;
         }
-        return HardcodedDefaults.isNoPdfInfo();
+        return getSetup().isNoPdfInfo();
     }
 
     public boolean isColoured() {
@@ -299,7 +357,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(INFO_BEFORE)) {
             return -Math.abs(Integer.valueOf(line.getOptionValue(INFO_BEFORE)));
         } else {
-            return -Math.abs(HardcodedDefaults.getDefaultBefore());
+            return -Math.abs(getSetup().getShowBefore());
         }
     }
 
@@ -308,7 +366,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(INFO_AFTER)) {
             return Integer.valueOf(line.getOptionValue(INFO_AFTER));
         } else {
-            return HardcodedDefaults.getDefaultAfter();
+            return getSetup().getShowAfter();
         }
     }
 
@@ -317,7 +375,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(DEAD_LINE)) {
             return Integer.valueOf(line.getOptionValue(DEAD_LINE));
         } else {
-            return HardcodedDefaults.getDidYouMeantDeadLine();
+            return getSetup().getDidYouMeantDeadLine();
         }
     }
 
@@ -326,7 +384,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(DID_COUNT)) {
             return Integer.valueOf(line.getOptionValue(DID_COUNT));
         } else {
-            return HardcodedDefaults.getDidYouMeantCount();
+            return getSetup().getDidYouMeantCount();
         }
     }
 
@@ -344,7 +402,16 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(RECORDS)) {
             return Integer.valueOf(line.getOptionValue(RECORDS));
         } else {
-            return HardcodedDefaults.getShowRecordsDefault();
+            return getSetup().getShowRecords();
+        }
+    }
+
+    @Override
+    public String getLibrary() {
+        if (line.hasOption(LIBRARY)) {
+            return (line.getOptionValue(LIBRARY));
+        } else {
+            return DEFAULT_LIBRARY;
         }
     }
 
@@ -364,6 +431,7 @@ public class Commandline implements SearchSettings {
         Commandline cmds = this;
         cmds.checkHelp();
         cmds.checkVersion();
+        cmds.checkLibraries();
         cmds.verifyIndex();
         cmds.verifyServer();
         cmds.verifyFirefox();
@@ -444,6 +512,30 @@ public class Commandline implements SearchSettings {
 
     public static boolean isUnix() {
         return !isWindows();
+    }
+
+    private static void verify(String library) {
+        File ca = new File(JavadocOfflineSearch.CACHE, library);
+        File co = new File(JavadocOfflineSearch.CONFIG, library);
+
+        verifySingle(ca);
+        verifySingle(co);
+    }
+
+    private static void verifySingle(File ca) {
+        if (ca.exists()) {
+            if (ca.list().length > 0) {
+                System.out.println("looks OK: " + ca.getAbsolutePath() + " items: " + ca.list());
+            } else {
+                System.out.println("Warning!: " + ca.getAbsolutePath() + " is empty!");
+            }
+        } else {
+            System.out.println("Error!: " + ca.getAbsolutePath() + " dont exists!");
+        }
+    }
+
+    private LibrarySetup getSetup() {
+        return LibraryManager.getLibraryManager().getLibrarySetup(getLibrary());
     }
 
 }

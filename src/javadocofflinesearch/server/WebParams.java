@@ -10,7 +10,6 @@ import java.net.URLDecoder;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.formatters.Formatter;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
-import javadocofflinesearch.tools.HardcodedDefaults;
 
 /**
  *
@@ -290,6 +289,11 @@ public class WebParams implements SearchSettings {
         } else {
             return HardcodedDefaults.isMergeResults();
         }
+    }
+
+    @Override
+    public String getLibrary() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

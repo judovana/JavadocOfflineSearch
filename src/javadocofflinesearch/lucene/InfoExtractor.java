@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import javadocofflinesearch.formatters.Formatter;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.htmlprocessing.StreamCrossroad;
-import javadocofflinesearch.tools.HardcodedDefaults;
+import javadocofflinesearch.tools.LibrarySetup;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -23,13 +23,19 @@ import org.xml.sax.SAXException;
  */
 public class InfoExtractor {
 
-    public static String extract(String url, String queryString, Formatter f, int lShift, int rShift) throws IOException, SAXException, ParserConfigurationException {
+    private final LibrarySetup setup;
+
+    public InfoExtractor(LibrarySetup l) {
+        this.setup = l;
+    }
+
+    public String extract(String url, String queryString, Formatter f, int lShift, int rShift) throws IOException, SAXException, ParserConfigurationException {
         String s = new StreamCrossroad(null, null).tryURL2(url);
         s = s.replaceAll("<!--.*?-->", "");//?
         Pattern p = Pattern.compile("(?i)" + queryString.trim().replaceAll("\\s+", "|"));
         Matcher m = p.matcher(s);
-        int noMoreNeeded = HardcodedDefaults.getInfoLoad();
-        int show = HardcodedDefaults.getInfoShow();
+        int noMoreNeeded = setup.getMaxLoad();
+        int show = setup.getMaxShow();
 
         if (f != null && f instanceof SearchableHtmlFormatter) {
             SearchableHtmlFormatter w = (SearchableHtmlFormatter) f;

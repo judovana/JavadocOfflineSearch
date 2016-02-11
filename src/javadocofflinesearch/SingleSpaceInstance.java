@@ -12,7 +12,7 @@ import java.util.Date;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.server.ServerLauncher;
 import javadocofflinesearch.tools.Commandline;
-import javadocofflinesearch.tools.Setup;
+import javadocofflinesearch.tools.LibraryManager;
 
 /**
  *
@@ -27,13 +27,13 @@ public class SingleSpaceInstance {
     SingleSpaceInstance(File CONFIG, File CACHE, Commandline cmds) {
         cache = CACHE;
         config = CONFIG;
-        Setup.createSetup(CONFIG);
+        LibraryManager.createtLibraryManager(config, cache);
         this.cmds = cmds;
     }
 
     void run() {
         try {
-            Setup.getSetup().preload();
+            LibraryManager.getLibraryManager().preload();
             if (cmds.hasServer()) {
                 ServerLauncher lServerLuncher = new ServerLauncher(JavadocOfflineSearch.PORT,  cache, config);
                 Thread r = new Thread(lServerLuncher);

@@ -51,9 +51,7 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.lucene.MainIndex;
-import javadocofflinesearch.tools.HardcodedDefaults;
 import javadocofflinesearch.tools.LevenshteinDistance;
-import javadocofflinesearch.tools.Setup;
 
 /**
  * based on http://www.mcwalter.org/technology/java/httpd/tiny/index.html Very

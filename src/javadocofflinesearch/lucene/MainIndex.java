@@ -16,7 +16,6 @@ import javadocofflinesearch.extensions.HrefCounter;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.formatters.Formatter;
 import javadocofflinesearch.htmlprocessing.StreamCrossroad;
-import javadocofflinesearch.tools.Setup;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
@@ -42,9 +41,10 @@ public class MainIndex {
     private final Vocabulary vocabualry;
     private final HrefCounter hc;
     private final File INDEX;
+    public static final String mainIndexName = "javadocIndex.index";
 
     public MainIndex(File cache, File config) throws IOException {
-        INDEX = new File(cache, "javadocIndex.index");
+        INDEX = new File(cache, mainIndexName);
         this.hc = new HrefCounter(cache, config);
         this.vocabualry = new Vocabulary(cache);
         this.streamizer = new StreamCrossroad(hc, vocabualry);
@@ -72,7 +72,7 @@ public class MainIndex {
         s += hc.getFile1().getAbsolutePath() + " records: " + hc.size() + "\n";
         s += vocabualry.getFile().getAbsolutePath() + " records: " + vocabualry.size() + "\n";
         s += "Your may also check content of:\n";
-        s += Setup.getSetup().getMAIN_CONFIG().getAbsolutePath() + "\n";
+        s += javadocofflinesearch.JavadocOfflineSearch.CONFIG + "\n";
         return s;
     }
 

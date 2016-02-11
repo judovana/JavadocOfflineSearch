@@ -30,6 +30,8 @@ public class HrefCounter {
 
     private final File file1;
     private final File file2;
+    public static final String customClicksName = "customClicks";
+    public static final String pageIndexName = "pageIndex";
 
     public File getFile1() {
         return file1;
@@ -40,8 +42,8 @@ public class HrefCounter {
     }
 
     public HrefCounter(File cache, File config) {
-        this.file1 = new File(cache, "pageIndex");
-        this.file2 = new File(config, "customClicks");
+        this.file1 = new File(cache, pageIndexName);
+        this.file2 = new File(config, customClicksName);
     }
 
     public void countPoints(String s) {

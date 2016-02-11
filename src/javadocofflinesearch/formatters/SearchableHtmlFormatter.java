@@ -9,7 +9,6 @@ import java.io.PrintStream;
 import java.util.Date;
 import javadocofflinesearch.server.WebParams;
 import javadocofflinesearch.tools.Commandline;
-import javadocofflinesearch.tools.HardcodedDefaults;
 
 /**
  *

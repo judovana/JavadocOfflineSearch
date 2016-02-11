@@ -23,13 +23,14 @@ public class Vocabulary {
 
     Set<String> voc = new HashSet<>();
     private final File file;
+    public static final String vocName = "vocabulary";
 
     public File getFile() {
         return file;
     }
 
     public Vocabulary(File cache) {
-        this.file = new File(cache, "vocabulary");
+        this.file = new File(cache, vocName);
     }
 
     public void add(String[] nwv) {
