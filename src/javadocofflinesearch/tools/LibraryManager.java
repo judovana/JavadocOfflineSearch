@@ -5,12 +5,16 @@
  */
 package javadocofflinesearch.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javadocofflinesearch.extensions.HrefCounter;
@@ -20,6 +24,42 @@ import javadocofflinesearch.extensions.HrefCounter;
  * @author jvanek
  */
 public class LibraryManager {
+
+    private static String defaultLibrary = null;
+    public static final String defaultLibDefName = "defaultLib";
+    private static final String DEF = "default";
+
+    public static synchronized String getDefaultLIbrary() {
+        if (defaultLibrary == null) {
+            defaultLibrary = laodDefaultLIbrary();
+        }
+        return defaultLibrary;
+    }
+
+    private static String laodDefaultLIbrary() {
+        try {
+            File f = new File(javadocofflinesearch.JavadocOfflineSearch.CONFIG, defaultLibDefName);
+            if (f.exists()) {
+                String s = readStrinfromFile(f);
+                if (s == null || s.trim().isEmpty()) {
+                    return DEF;
+                }
+                return s;
+            } else {
+                return DEF;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return DEF;
+        }
+    }
+
+    private static String readStrinfromFile(File f) throws IOException {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "utf-8"))) {
+            String s = br.readLine();
+            return s;
+        }
+    }
 
     private final File config;
     private final File cache;

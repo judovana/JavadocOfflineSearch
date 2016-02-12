@@ -32,7 +32,7 @@ public class WebParams implements SearchSettings {
 
     private final String origQuery;
 
-    private String library = Commandline.DEFAULT_LIBRARY;
+    private String library;
 
     private Integer infoBefore;
     private Integer infoAfter;
@@ -299,7 +299,7 @@ public class WebParams implements SearchSettings {
     @Override
     public String getLibrary() {
         if (library == null) {
-            return Commandline.DEFAULT_LIBRARY;
+            return LibraryManager.getDefaultLIbrary();
         }
         return library;
     }

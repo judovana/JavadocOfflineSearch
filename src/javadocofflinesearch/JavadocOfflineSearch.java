@@ -12,6 +12,7 @@ import javadocofflinesearch.extensions.HrefCounter;
 import javadocofflinesearch.extensions.Vocabulary;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.tools.Commandline;
+import javadocofflinesearch.tools.LibraryManager;
 import javadocofflinesearch.tools.LibrarySetup;
 import org.apache.lucene.queryparser.classic.ParseException;
 
@@ -110,7 +111,7 @@ public class JavadocOfflineSearch {
     }
 
     public static List<String> getConigLIbraries() {
-        return listLibraries(CONFIG, LibrarySetup.configName, HrefCounter.customClicksName);
+        return listLibraries(CONFIG, LibrarySetup.configName, HrefCounter.customClicksName, LibraryManager.defaultLibDefName);
     }
 
     public static List<String> getCacheLIbraries() {

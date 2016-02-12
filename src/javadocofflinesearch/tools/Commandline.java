@@ -68,7 +68,6 @@ public class Commandline implements SearchSettings {
     public static final String NO_PDF_INFO = "no-pdf-info";
     public static final String LIBRARY = "library";
     public static final String LIBRARIES = "libraries";
-    public static final String DEFAULT_LIBRARY = "default";
     public static final String PORT = "port";
 
     public Commandline(String[] args) {
@@ -167,9 +166,15 @@ public class Commandline implements SearchSettings {
                 for (String library : merged) {
                     verify(library);
                 }
+                System.out.println("* - prefixed library is default (see config file of " + LibraryManager.defaultLibDefName + ")");
                 //second only invalid libraries
                 System.out.println("    Possibly corrupted libraries:");
                 for (String library : merged) {
+                    if (library.equals(LibraryManager.getDefaultLIbrary())) {
+                        System.out.print("* ");
+                    } else {
+                        System.out.print("  ");
+                    }
                     if (configList.contains(library) && cacheList.contains(library)) {
                         //System.out.println(library);
                     } else if (!configList.contains(library) && cacheList.contains(library)) {
@@ -183,6 +188,11 @@ public class Commandline implements SearchSettings {
                 //last only valid libraries
                 System.out.println("    Libraries:");
                 for (String library : merged) {
+                    if (library.equals(LibraryManager.getDefaultLIbrary())) {
+                        System.out.print("* ");
+                    } else {
+                        System.out.print("  ");
+                    }
                     if (configList.contains(library) && cacheList.contains(library)) {
                         System.out.println(library);
                     } else if (!configList.contains(library) && cacheList.contains(library)) {
@@ -226,7 +236,7 @@ public class Commandline implements SearchSettings {
         if (!line.hasOption(INDEX)) {
             return;
         }
-        File f = new File(JavadocOfflineSearch.CONFIG + File.separator + getLibrary() +File.separator+ LibrarySetup.configName);
+        File f = new File(JavadocOfflineSearch.CONFIG + File.separator + getLibrary() + File.separator + LibrarySetup.configName);
         String inConfigDirs = null;
         if (f.exists()) {
             try {
@@ -467,7 +477,7 @@ public class Commandline implements SearchSettings {
         if (line.hasOption(LIBRARY)) {
             return (line.getOptionValue(LIBRARY));
         } else {
-            return DEFAULT_LIBRARY;
+            return LibraryManager.getDefaultLIbrary();
         }
     }
 
@@ -484,6 +494,10 @@ public class Commandline implements SearchSettings {
     }
 
     public void checkAll() {
+        if (args.length == 0) {
+            System.out.println("What to do? Try readme or -h/--help");
+            System.exit(25);
+        }
         Commandline cmds = this;
         cmds.checkHelp();
         cmds.checkVersion();
