@@ -7,8 +7,10 @@ package javadocofflinesearch.formatters;
 
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.Set;
 import javadocofflinesearch.server.WebParams;
 import javadocofflinesearch.tools.Commandline;
+import javadocofflinesearch.tools.LibraryManager;
 import javadocofflinesearch.tools.LibrarySetup;
 
 /**
@@ -91,7 +93,14 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"page-index\" " + getCheckedPage() + "> use page index (it learns!)");
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"lucene-index\" " + getCheckedLucene() + "> use lucene index");
         out.println("<input type=\"checkbox\" name=\"" + merge + "\" value=\"true\"  " + getCheckedMerge() + ">" + getMergeText());
-        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a> see indexes: file://path page/lucene<br/>");
+        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a> see indexes: file://path page/lucene. LIbrary:");
+        out.println("<select name='"+library+"'>");
+        Set<String> l = javadocofflinesearch.JavadocOfflineSearch.listLibraries();
+        for (String l1 : l) {
+            out.println("<option value='" + l1 + "' " + selected(l1) + " >" + l1 + "</option>");
+        }
+        out.println("</select>");
+        out.println("<br/>");
         out.println("</span>");
         out.println("<span>");
         out.println("  <input type=\"text\" id='t1' name=\"" + query + "\" value=\"" + getQueryValue() + "\"   style=\"width:99%;\"/><br/>");
@@ -280,4 +289,29 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         return "";
     }
 
+    private String selected(String l1) {
+        if (defaults != null) {
+            if (defaults.getLibrary() != null) {
+                if (l1.equals(defaults.getLibrary())) {
+                    return "selected";
+                } else {
+                    return "";
+                }
+            } else {
+                if (l1.equals(LibraryManager.getDefaultLIbrary())) {
+                    return "selected";
+                } else {
+                    return "";
+                }
+            }
+        } else {
+            if (l1.equals(LibraryManager.getDefaultLIbrary())) {
+                return "selected";
+            } else {
+                return "";
+            }
+        }
+    }
+
 }
+
