@@ -6,11 +6,16 @@
 package javadocofflinesearch.tools;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.JavadocOfflineSearch;
+import javadocofflinesearch.extensions.Vocabulary;
 import javadocofflinesearch.formatters.AjaxHtmlFormatter;
 import javadocofflinesearch.formatters.ColoredPlainTextFormatter;
 import javadocofflinesearch.formatters.Formatter;
@@ -64,6 +69,7 @@ public class Commandline implements SearchSettings {
     public static final String LIBRARY = "library";
     public static final String LIBRARIES = "libraries";
     public static final String DEFAULT_LIBRARY = "default";
+    public static final String PORT = "port";
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -89,7 +95,8 @@ public class Commandline implements SearchSettings {
         Option archives = new Option("z", ARCHIVES, false, "will ignore items from archvies from search results");
         Option pdfInfo = new Option("P", NO_PDF_INFO, false, "will not print info from pdfs");
         Option library = new Option("L", LIBRARY, true, " will index into /search in  specified library. If not set 'default' is used");
-        Option libraries = new Option(LIBRARIES, false, " list avaible libraries");
+        Option libraries = new Option("S", LIBRARIES, false, " list avaible libraries");
+        Option port = new Option("O", PORT, true, " lset custom port instead of " + JavadocOfflineSearch.PORT + ".Warning - Unless you must,try to avoid running of multiple instances. Access to files is not exacty multi-app safe. (but hsould work)");
 
         Option search = new Option("q", QUERY, true, "is considered default when no argument is given. Search docs. '-' connected wth word is NOT.");
         Option engine = new Option("e", PRINT_ENGINE, false, "will print out firefox's search engine to be used as firefox plugin");
@@ -197,10 +204,10 @@ public class Commandline implements SearchSettings {
             formatter.printHelp("Javadoc offline search", options);
             System.out.println("When used from commandline, it is expected to run with `more`.");
             System.out.println("When run with `more` please set colors (-c) manually.");
-            System.out.println("* java -jar JavadocOfflineSearch.jar -index");
             System.out.println("* java -jar JavadocOfflineSearch.jar  -query");
-            System.out.println("* index all files in $XDG_CONFIG_DIR/JavadocOfflineSearch/javadocOfflineSearch.properties");
-            System.out.println("* by default " + LibrarySetup.VALUE);
+            System.out.println("* java -jar JavadocOfflineSearch.jar -index");
+            System.out.println("* index all files in $XDG_CONFIG_DIR/JavadocOfflineSearch/LIBRARY/javadocOfflineSearch.properties");
+            System.out.println("* If this file not yet exists, you must specify those dir(s)/file(s) on commandline");
             System.out.println("to use firefox search plugin comaptible and/or commandline approach run:");
             System.out.println("* java -jar JavadocOfflineSearch.jar  -start-server & firefox");
 
@@ -216,20 +223,68 @@ public class Commandline implements SearchSettings {
     }
 
     public void verifyIndex() {
-        //FIXME-include query+configFile verification
-        if (line.hasOption(INDEX) && line.hasOption(LIBRARY) && args.length != 3) {
-            System.out.println("when " + INDEX + " is used with " + LIBRARY + " then line must have exactly three argments - index, library and name of library");
-            System.exit(1);
+        if (!line.hasOption(INDEX)) {
+            return;
         }
-        if (line.hasOption(INDEX) && !line.hasOption(LIBRARY) && args.length != 1) {
-            System.out.println(INDEX + " must be lone item.");
-            System.exit(1);
+        File f = new File(JavadocOfflineSearch.CONFIG + File.separator + getLibrary() +File.separator+ LibrarySetup.configName);
+        String inConfigDirs = null;
+        if (f.exists()) {
+            try {
+                Properties p = new Properties();
+                p.load(new InputStreamReader(new FileInputStream(f), "utf-8"));
+                inConfigDirs = p.getProperty(LibrarySetup.DIRS);
+                if (inConfigDirs == null) {
+                    System.out.println(f + " exists, but empty is: " + LibrarySetup.DIRS);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
+        if (inConfigDirs != null) {
+            if (line.hasOption(INDEX) && line.hasOption(LIBRARY) && args.length != 3) {
+                System.out.println("when indexing known (or initialized default) library is used with " + LIBRARY + " then line must have exactly three argments - index, library and name of library");
+                System.exit(1);
+            }
+            if (line.hasOption(INDEX) && !line.hasOption(LIBRARY) && args.length != 1) {
+                System.out.println(INDEX + " must be lone item when eindexind known (or default) library");
+                System.exit(1);
+            }
+            System.out.println(getLibrary() + " will reindex: " + inConfigDirs);
+        } else {
+            if (line.hasOption(INDEX) && line.hasOption(LIBRARY) && args.length <= 3) {
+                System.out.println("when indexing NEW (or initing default) library is used with " + LIBRARY + " then line must contain also file(s)/dir(s) to scan");
+                System.exit(1);
+            }
+            if (line.hasOption(INDEX) && !line.hasOption(LIBRARY) && args.length <= 1) {
+                System.out.println("when indexing NEW (or initing default)  then line must contain also file(s)/dir(s) to scan");
+                System.exit(1);
+            }
+            List<String> newDefaultLibraries = line.getArgList();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < newDefaultLibraries.size(); i++) {
+                String get = newDefaultLibraries.get(i);
+                sb.append(get);
+                if (i < newDefaultLibraries.size() - 1) {
+                    sb.append(";");
+                }
+            }
+            inConfigDirs = sb.toString();
+            while (inConfigDirs.contains(";;")) {
+                inConfigDirs = inConfigDirs.replace(";;", ";");
+            }
+            LibrarySetup.DEFAULT_DIRS = inConfigDirs;
+            System.out.println(getLibrary() + " will index: " + inConfigDirs);
+        }
+
     }
 
     public void verifyServer() {
-        if (line.hasOption(START_SERVER) && args.length != 1) {
-            System.out.println(START_SERVER + " must be lone item.");
+        if (line.hasOption(START_SERVER) && !hasPort() && args.length != 1) {
+            System.out.println(START_SERVER + " must be lone item. (oe with port)");
+            System.exit(1);
+        }
+        if (line.hasOption(START_SERVER) && hasPort() && args.length != 3) {
+            System.out.println(START_SERVER + " with port and its arg must be lone item. ");
             System.exit(1);
         }
     }
@@ -429,7 +484,6 @@ public class Commandline implements SearchSettings {
     }
 
     public void checkAll() {
-        //FIXME  pouze pri index umoznit neexistujici library
         Commandline cmds = this;
         cmds.checkHelp();
         cmds.checkVersion();
@@ -439,6 +493,7 @@ public class Commandline implements SearchSettings {
         cmds.verifyFirefox();
         if (!(hasIndex() || hasServer() || hasPrintFirefoxEngine())) {
             cmds.checkDupes();
+            cmds.checkLibrary();
             cmds.verifyQeury();
             cmds.checkFormatters();
             cmds.checkExtractInfo();
@@ -537,8 +592,37 @@ public class Commandline implements SearchSettings {
     }
 
     @Override
-    public  LibrarySetup getSetup() {
+    public LibrarySetup getSetup() {
         return LibraryManager.getLibraryManager().getLibrarySetup(getLibrary());
+    }
+
+    public int getPort() {
+        if (hasPort()) {
+            return Integer.valueOf(line.getOptionValue(PORT));
+        }
+        return JavadocOfflineSearch.PORT;
+    }
+
+    private boolean hasPort() {
+        return line.hasOption(PORT);
+    }
+
+    private void checkLibrary() {
+        //here we know that it is not index/server/firefox
+        Set<String> q = JavadocOfflineSearch.listLibraries();
+        if (!q.contains(getLibrary())) {
+            System.out.println("When you wont to use library for reading, it must exists. " + getLibrary() + " Does not.");
+            if (q.size() > 0) {
+                List<String> l = Vocabulary.didYouMean(5, q, getLibrary());
+                System.out.println("Could you mean: ");
+                System.out.print(" ");
+                for (String l1 : l) {
+                    System.out.print(" " + l1);
+                }
+                System.out.println("");
+            }
+            System.exit(15);
+        }
     }
 
 }

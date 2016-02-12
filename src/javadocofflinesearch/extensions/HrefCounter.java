@@ -56,6 +56,10 @@ public class HrefCounter {
     }
 
     public void saveHrefs() throws IOException {
+        if (priorities.isEmpty()){
+            //only plain/pdfs?
+            priorities.put("pdfOrPlainsOnly", 0);
+        }
         saveHrefs(file, priorities);
     }
 

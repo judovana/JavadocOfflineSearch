@@ -38,7 +38,6 @@ package javadocofflinesearch.server;
 
 import java.io.File;
 import java.net.ServerSocket;
-import javadocofflinesearch.lucene.MainIndex;
 
 /**
  * wrapper around tiny http server to separate lunch configurations and servers.
@@ -49,12 +48,8 @@ public class ServerLauncher implements Runnable {
     private boolean running;
     private final Integer port;
     private ServerSocket serverSocket;
-    private final File cache;
-    private final File config;
 
-    public ServerLauncher(int port, File cache, File config) {
-        this.cache = cache;
-        this.config = config;
+    public ServerLauncher(int port) {
         this.port = port;
         System.err.println("http://localhost:" + port);
         System.out.println("http://localhost:" + port);

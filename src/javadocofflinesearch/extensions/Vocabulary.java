@@ -123,8 +123,12 @@ public class Vocabulary {
     }
 
     public List<String> didYouMean(int count, String queryString) {
+        return didYouMean(count, voc, queryString);
+    }
+
+    public static List<String> didYouMean(int count, Iterable<String> posibilities, String queryString) {
         List<ResultWithDistance> r = new ArrayList<>();
-        for (String voc1 : voc) {
+        for (String voc1 : posibilities) {
             int l = LevenshteinDistance.levenshteinDistance(voc1, queryString);
             r.add(new ResultWithDistance(l, voc1));
         }
@@ -147,6 +151,13 @@ public class Vocabulary {
 
     public int size() {
         return voc.size();
+    }
+
+    public void addAll(String s) {
+        String[] vocabulary1 = s.split("\\s+"); //java.security
+        String[] vocabulary2 = s.split("[\\W]"); //java security
+        this.add(vocabulary1);
+        this.add(vocabulary2);
     }
 
 }

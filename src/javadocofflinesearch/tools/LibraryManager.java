@@ -31,10 +31,6 @@ public class LibraryManager {
         this.cache = cache;
         mainSetup = new LibrarySetup(config, cache, null);
         Set<String> l = javadocofflinesearch.JavadocOfflineSearch.listLibraries();
-        if (!l.contains(Commandline.DEFAULT_LIBRARY)) {
-            l = new HashSet<>(l);
-            l.add(Commandline.DEFAULT_LIBRARY);
-        }
         for (String library : l) {
             initLIbrary(config, library, cache);
         }

@@ -20,8 +20,9 @@ import javadocofflinesearch.lucene.IndexerSettings;
  */
 public class LibrarySetup implements IndexerSettings {
 
-    private static final String DIRS = "docs.dirs";
-    public static final String VALUE = "/usr/share/javadoc/java";
+    public static final String DIRS = "docs.dirs";
+    //public static final String VALUE = "/usr/share/javadoc/java";
+    public static  String DEFAULT_DIRS ;
     public static final String SEMICOLON = ";";
 
     private static final String NLE = "ignore.name.lower.equals";
@@ -111,7 +112,7 @@ public class LibrarySetup implements IndexerSettings {
             System.out.println(settingsFile.getAbsoluteFile() + " dont exists. Creating with defaults.");
             if (parent != null) {
                 //to the "son" we put only where to search
-                p.setProperty(DIRS, VALUE);
+                p.setProperty(DIRS, DEFAULT_DIRS);
             } else {
                 //allother setting is in main setup
                 //but is overwritebale from  "son"

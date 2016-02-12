@@ -86,10 +86,7 @@ public class XmledHtmlToText {
         }
         hoefullyXmlizedInputStream.close();
         if (stats) {
-            String[] vocabulary1 = s.split("\\s+"); //java.security
-            String[] vocabulary2 = s.split("[\\W]"); //java security
-            vc.add(vocabulary1);
-            vc.add(vocabulary2);
+            vc.addAll(s);
         }
         return new String[]{title, s};
 

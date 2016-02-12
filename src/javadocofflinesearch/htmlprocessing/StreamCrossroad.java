@@ -24,9 +24,11 @@ public class StreamCrossroad {
     private final XmledHtmlToText htmlizer;
     private static final String pdfCheck = "org.apache.pdfbox.pdfparser.PDFParser";
     private static Boolean isPdfBox = null;
+    private final PdfAttempter pdfAttempter;
 
     public StreamCrossroad(HrefCounter hc, Vocabulary vocabualry) {
         htmlizer = new XmledHtmlToText(hc, vocabualry);
+        pdfAttempter = new PdfAttempter(vocabualry);
     }
 
     public void saveCacheMetadata() throws IOException {
@@ -59,7 +61,7 @@ public class StreamCrossroad {
             //first pdf otherwise tagsoup will get med
             if (checkPdfBox(file.getFile())) {
                 try (InputStream is = file.openStream()) {
-                    String s = PdfAttempter.pdftoText(is);
+                    String s = pdfAttempter.pdftoText(is, true);
                     result = new TitledByteArrayInputStream(new File(file.getFile()).getName(), s.getBytes("utf-8"));
                 }
             }
@@ -81,7 +83,7 @@ public class StreamCrossroad {
             //first pdf otherwise tagsoup will get med
             if (checkPdfBox(url)) {
                 try (InputStream is = new URL(url).openStream()) {
-                    result = PdfAttempter.pdftoText(is);
+                    result = pdfAttempter.pdftoText(is, false);
 
                 }
             }

@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import javadocofflinesearch.extensions.Vocabulary;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -21,13 +22,13 @@ import org.apache.pdfbox.util.PDFTextStripper;
  */
 public class PdfAttempter {
 
-    static String pdftoText(String fileName) throws FileNotFoundException, IOException {
+    private final Vocabulary vc;
 
-        File f = new File(fileName);
-        return pdftoText(new FileInputStream(f));
+    PdfAttempter(Vocabulary vocabualry) {
+        this.vc = vocabualry;
     }
 
-    static String pdftoText(InputStream is) throws IOException {
+    String pdftoText(InputStream is, boolean stats) throws IOException {
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         try {
@@ -36,7 +37,11 @@ public class PdfAttempter {
             cosDoc = parser.getDocument();
             PDFTextStripper pdfStripper = new PDFTextStripper();
             pdDoc = new PDDocument(cosDoc);
-            return pdfStripper.getText(pdDoc);
+            String text = pdfStripper.getText(pdDoc);
+            if (stats) {
+                vc.addAll(text);
+            }
+            return text;
         } finally {
             if (cosDoc != null) {
                 cosDoc.close();
