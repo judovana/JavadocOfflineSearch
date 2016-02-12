@@ -221,7 +221,9 @@ public class Commandline implements SearchSettings {
             System.out.println("When used from commandline, it is expected to run with `more`.");
             System.out.println("When run with `more` please set colors (-c) manually.");
             System.out.println("* java -jar JavadocOfflineSearch.jar  -query");
+            System.out.println("* java -jar JavadocOfflineSearch.jar  -libray <name> -query");
             System.out.println("* java -jar JavadocOfflineSearch.jar -index");
+            System.out.println("* java -jar JavadocOfflineSearch.jar -library <anme> -index");
             System.out.println("* index all files in $XDG_CONFIG_DIR/JavadocOfflineSearch/LIBRARY/javadocOfflineSearch.properties");
             System.out.println("* If this file not yet exists, you must specify those dir(s)/file(s) on commandline");
             System.out.println("to use firefox search plugin comaptible and/or commandline approach run:");
