@@ -94,6 +94,9 @@ public class LibraryManager {
     }
 
     public LibrarySetup getLibrarySetup(String name) {
+        if (name == null) {
+            name = getDefaultLIbrary();
+        }
         LibrarySetup q = librares.get(name);
         if (q == null) {
             q = initLIbrary(config, name, cache);
