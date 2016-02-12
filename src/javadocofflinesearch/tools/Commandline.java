@@ -262,7 +262,7 @@ public class Commandline implements SearchSettings {
                 System.exit(1);
             }
             if (line.hasOption(INDEX) && !line.hasOption(LIBRARY) && args.length != 1) {
-                System.out.println(INDEX + " must be lone item when eindexind known (or default) library");
+                System.out.println(INDEX + " must be lone item when indexing known (or default) library");
                 System.exit(1);
             }
             System.out.println(getLibrary() + " will reindex: " + inConfigDirs);
