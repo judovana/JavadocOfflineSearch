@@ -170,41 +170,47 @@ public class Commandline implements SearchSettings {
                 //second only invalid libraries
                 System.out.println("    Possibly corrupted libraries:");
                 for (String library : merged) {
-                    if (library.equals(LibraryManager.getDefaultLIbrary())) {
-                        System.out.print("* ");
-                    } else {
-                        System.out.print("  ");
-                    }
                     if (configList.contains(library) && cacheList.contains(library)) {
+                        //prefixLIbrary(library);
                         //System.out.println(library);
                     } else if (!configList.contains(library) && cacheList.contains(library)) {
+                        prefixLIbrary(library);
                         System.out.println("WARNING only in cache folder - " + library);
                     } else if (configList.contains(library) && !cacheList.contains(library)) {
+                        prefixLIbrary(library);
                         System.out.println("WARNING only in config folder - " + library);
                     } else {
+                        prefixLIbrary(library);
                         System.out.println("Error, library from different planet - " + library);
                     }
                 }
                 //last only valid libraries
                 System.out.println("    Libraries:");
                 for (String library : merged) {
-                    if (library.equals(LibraryManager.getDefaultLIbrary())) {
-                        System.out.print("* ");
-                    } else {
-                        System.out.print("  ");
-                    }
                     if (configList.contains(library) && cacheList.contains(library)) {
+                        prefixLIbrary(library);
                         System.out.println(library);
                     } else if (!configList.contains(library) && cacheList.contains(library)) {
+                        //prefixLIbrary(library);
                         //System.out.println("WARNING only in cache folder - " + library);
                     } else if (configList.contains(library) && !cacheList.contains(library)) {
+                        //prefixLIbrary(library);
                         //System.out.println("WARNING only in config folder - " + library);
                     } else {
+                        //prefixLIbrary(library);
                         //System.out.println("Error, library from different planet - " + library);
                     }
                 }
             }
             System.exit(0);
+        }
+    }
+
+    private void prefixLIbrary(String library) {
+        if (library.equals(LibraryManager.getDefaultLIbrary())) {
+            System.out.print("* ");
+        } else {
+            System.out.print("  ");
         }
     }
 
@@ -596,7 +602,7 @@ public class Commandline implements SearchSettings {
     private static void verifySingle(File ca) {
         if (ca.exists()) {
             if (ca.list().length > 0) {
-                System.out.println("looks OK: " + ca.getAbsolutePath() + " items: " + ca.list());
+                System.out.println("looks OK: " + ca.getAbsolutePath() + " items: " + toStringList(ca.list()));
             } else {
                 System.out.println("Warning!: " + ca.getAbsolutePath() + " is empty!");
             }
@@ -637,6 +643,14 @@ public class Commandline implements SearchSettings {
             }
             System.exit(15);
         }
+    }
+
+    private static String toStringList(String[] list) {
+        StringBuilder sb = new StringBuilder();
+        for (String list1 : list) {
+            sb.append(list1).append(" ");
+        }
+        return sb.toString();
     }
 
 }
