@@ -7,7 +7,6 @@ package javadocofflinesearch.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.List;
@@ -127,6 +126,7 @@ public class Commandline implements SearchSettings {
         options.addOption(pdfInfo);
         options.addOption(library);
         options.addOption(libraries);
+        options.addOption(port);
         this.args = args;
 
     }

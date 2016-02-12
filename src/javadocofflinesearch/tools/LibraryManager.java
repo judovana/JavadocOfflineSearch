@@ -167,6 +167,12 @@ public class LibraryManager {
         try {
             //why did I added this?
             //if (absolutePath.toLowerCase().endsWith(".html") && hc.size() > 0) {
+            //thios should allow work in multiple running serverinstances
+            try {
+                getCustomClicks().loadHrefs();
+            } catch (Exception ex) {
+
+            }
             getCustomClicks().addLink(absolutePath, new URL(absolutePath), true);
             getCustomClicks().saveHrefs();
             //}
