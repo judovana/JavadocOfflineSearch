@@ -25,6 +25,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     public static final String previewMaxShow = "previewMaxShow";
     public static final String previewMaxLoad = "previewMaxLoad";
     public static final String merge = Commandline.MERGE_COMAPRATORS;
+    public static final String higlight = Commandline.HIGHLIGHT;
     public static final String query = Commandline.QUERY;
     public static final String library = Commandline.LIBRARY;
     public static final String noInfo = Commandline.NO_INFO;
@@ -57,7 +58,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         if (url.startsWith("jar")) {
             //appearently ! in middle is enugh :)
         }
-        out.println("<big><b><a href='" + href + "'>" + url + "</a>: </b></big>" + page + "/" + score + "<br/>");
+        out.println("<big><b><a href='" + href + createCommand() + "'>" + url + "</a>: </b></big>" + page + "/" + score + "<br/>");
     }
 
     @Override
@@ -93,8 +94,8 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"page-index\" " + getCheckedPage() + "> use page index (it learns!)");
         out.println("<input type=\"radio\" name=\"" + searchType + "\" value=\"lucene-index\" " + getCheckedLucene() + "> use lucene index");
         out.println("<input type=\"checkbox\" name=\"" + merge + "\" value=\"true\"  " + getCheckedMerge() + ">" + getMergeText());
-        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a> see indexes: file://path page/lucene. LIbrary:");
-        out.println("<select name='"+library+"'>");
+        out.println("<a href=\"https://lucene.apache.org/core/2_9_4/queryparsersyntax.html\" >basic lucene query sintax</a> see indexes: file://path page/lucene. Library:");
+        out.println("<select name='" + library + "'>");
         Set<String> l = javadocofflinesearch.JavadocOfflineSearch.listLibraries();
         for (String l1 : l) {
             out.println("<option value='" + l1 + "' " + selected(l1) + " >" + l1 + "</option>");
@@ -118,6 +119,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("  <input type=\"text\"  id='t7' name=\"" + records + "\" value=\"" + wasRecords() + "\"/> items per page<br/>");
         out.println("  <input type=\"text\"  id='t8' name=\"" + previewMaxShow + "\" value=\"" + wasMS() + "\"/> items to show in preview<br/>");
         out.println("  <input type=\"text\"  id='t9' name=\"" + previewMaxLoad + "\" value=\"" + wasML() + "\"/> items to load to show in preview<br/>");
+        out.println("  <input type=\"checkbox\" name=\"" + higlight + "\" value=\"true\" " + getCheckedHighlight() + "/> " + " Highlight. You must <b>rerun</b> the search(html only)" + "<br/>");
         out.println("</span>");
         out.println("</span>");
         //without submitbutton, the enter key do not work when more then one input type 'text' is presented
@@ -275,6 +277,17 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         return "";
     }
 
+    private String getCheckedHighlight() {
+        if (defaults != null) {
+            if (defaults.isHighlight()) {
+                return CHECKED;
+            } else {
+                return "";
+            }
+        }
+        return "";
+    }
+
     private String getWasshowAlsoPdfInfoSeelcted() {
         if (defaults != null) {
             if (defaults.isNegatePdf()) {
@@ -313,5 +326,13 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         }
     }
 
-}
+    private String createCommand() {
+        if (defaults != null) {
+            if (defaults.isHighlight()) {
+                return "?" + higlight + "=true" + "&" + query + "=" + defaults.getQuery();
+            }
+        }
+        return "";
+    }
 
+}

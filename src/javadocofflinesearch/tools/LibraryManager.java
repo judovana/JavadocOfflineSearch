@@ -13,11 +13,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javadocofflinesearch.extensions.HrefCounter;
+import javadocofflinesearch.extensions.Vocabulary;
 
 /**
  *
@@ -119,6 +122,21 @@ public class LibraryManager {
             }
         }
         return false;
+    }
+
+    public List<Vocabulary> getAllVocabularies() {
+        Set<String> l = javadocofflinesearch.JavadocOfflineSearch.listLibraries();
+        List<Vocabulary> r = new ArrayList<>(l.size());
+        for (String library : l) {
+            try {
+                Vocabulary v = new Vocabulary(new File(cache, library));
+                v.laodVocs();
+                r.add(v);
+            } catch (Exception ex) {
+                //we dont care here
+            }
+        }
+        return r;
     }
 
     private static class LibraryManagerHolder {

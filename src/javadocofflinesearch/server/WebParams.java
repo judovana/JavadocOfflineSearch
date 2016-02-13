@@ -10,7 +10,6 @@ import java.net.URLDecoder;
 import javadocofflinesearch.SearchSettings;
 import javadocofflinesearch.formatters.Formatter;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
-import javadocofflinesearch.tools.Commandline;
 import javadocofflinesearch.tools.LibraryManager;
 import javadocofflinesearch.tools.LibrarySetup;
 
@@ -29,6 +28,7 @@ public class WebParams implements SearchSettings {
     private Boolean lucene;
 
     private boolean wasFromPage = false;
+    private boolean highlight = false;
 
     private final String origQuery;
 
@@ -77,6 +77,10 @@ public class WebParams implements SearchSettings {
                 } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.showAlsoPdfInfo)) {
                     if (pair[1].equalsIgnoreCase("true")) {
                         negatePdf = true;
+                    }
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.higlight)) {
+                    if (pair[1].equalsIgnoreCase("true")) {
+                        highlight = true;
                     }
                 }//now less usefull stuff 
                 else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.infoBefore)) {
@@ -307,6 +311,10 @@ public class WebParams implements SearchSettings {
     @Override
     public LibrarySetup getSetup() {
         return LibraryManager.getLibraryManager().getLibrarySetup(getLibrary());
+    }
+
+    public boolean isHighlight() {
+        return highlight;
     }
 
 }

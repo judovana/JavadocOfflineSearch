@@ -5,6 +5,7 @@
  */
 package javadocofflinesearch.formatters;
 
+import java.awt.Color;
 import java.util.List;
 
 /**
@@ -16,8 +17,9 @@ public interface Formatter {
     public String highlitStart();
 
     public String highlightEnd();
-    
+
     public void haders();
+
     public void tail();
 
     public void title(int i, int totalHits, String title);
@@ -30,14 +32,18 @@ public interface Formatter {
 
     public void resulsSummary(String foundTitle, int totalHits, String timeTitle, long time, String units);
 
-    public void summary(String path, String queryString, int infoBefore, int infoAfter);
+    public String summary(String path, String queryString, int infoBefore, int infoAfter);
 
     public void initializationFailed(String s);
 
     public void resultsIn(String title, long l, String unit);
-    
+
     public void pages(int from, int to, int total);
-    
+
     void printLibrary(String library);
-    
+
+    public String highlitStart(Color c);
+
+    public String highlitEnd(Color c);
+
 }

@@ -68,6 +68,7 @@ public class Commandline implements SearchSettings {
     public static final String LIBRARY = "library";
     public static final String LIBRARIES = "libraries";
     public static final String PORT = "port";
+    public static final String HIGHLIGHT = "highlight";
 
     public Commandline(String[] args) {
         Option help = new Option("h", HELP, false, "print this message");
@@ -80,6 +81,7 @@ public class Commandline implements SearchSettings {
         Option server = new Option("s", START_SERVER, false, "will start the server on port 31745. You can then search in browser by http://lcoalhost:" + JavadocOfflineSearch.PORT);
         Option merge = new Option("g", MERGE_COMAPRATORS, false, "will use both lucene and page sorting to determine results");
         Option exInfo = new Option("x", EXTRACT_INFO, true, "from given document, extract those ...info...  based on query");
+        Option highlight = new Option("H", HIGHLIGHT, true, "in given document, highlight matched stuff");
         Option infoBefore = new Option("B", INFO_BEFORE, true, "number of characters between '...' and 'match'. default " + LibrarySetup.HardcodedDefaults.defaultBefore);
         Option infoAfter = new Option("A", INFO_AFTER, true, "number of characters between 'match' and '...'. default " + LibrarySetup.HardcodedDefaults.defaultAfter);
         Option didDead = new Option("d", DEAD_LINE, true, "min. number of result to occure before 'did you ment' is suggested. default " + LibrarySetup.HardcodedDefaults.didYouMeantDeadLine);
@@ -127,6 +129,7 @@ public class Commandline implements SearchSettings {
         options.addOption(library);
         options.addOption(libraries);
         options.addOption(port);
+        options.addOption(highlight);
         this.args = args;
 
     }
@@ -425,6 +428,13 @@ public class Commandline implements SearchSettings {
     public String getExctractInfo() {
         return line.getOptionValue(EXTRACT_INFO);
     }
+    public boolean isHighligt() {
+        return line.hasOption(HIGHLIGHT);
+    }
+
+    public String getHighligtInfo() {
+        return line.getOptionValue(HIGHLIGHT);
+    }
 
     @Override
     public int getInfoBefore() {
@@ -519,6 +529,7 @@ public class Commandline implements SearchSettings {
             cmds.verifyQeury();
             cmds.checkFormatters();
             cmds.checkExtractInfo();
+            cmds.chechHighlight();
         }
     }
 
@@ -534,7 +545,20 @@ public class Commandline implements SearchSettings {
             }
         }
     }
+    
+ private void chechHighlight() {
+        if (isHighligt()) {
+            if (hasQuery()) {
 
+            } else if (line.getArgs().length == 1) {
+
+            } else {
+                System.out.println(HIGHLIGHT + " can be used only with query or with single `query` argument.");
+                System.exit(1);
+            }
+        }
+    }
+ 
     private void checkFormatters() {
         int formaters = 0;
         if (isPlain()) {

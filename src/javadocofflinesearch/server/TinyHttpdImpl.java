@@ -47,11 +47,15 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
+import javadocofflinesearch.formatters.StaticHtmlFormatter;
+import javadocofflinesearch.lucene.InfoExtractor;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.tools.LevenshteinDistance;
 import javadocofflinesearch.tools.LibraryManager;
@@ -174,8 +178,17 @@ public class TinyHttpdImpl extends Thread {
                                     //this is learning, more this hreff is clicked, more is recorded
                                     LibraryManager.getLibraryManager().clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
                                     byte[] buff = streamToBYteArray(decodingStream);
+                                    WebParams cmds = new WebParams(query);
+                                    if (cmds.isHighlight()) {
+                                        String ll = potentionalFile.toLowerCase();
+                                        if (ll.endsWith(".html") || ll.endsWith(".htm")||ll.endsWith(".txt")) {
+                                            String s = new String(buff, "utf-8");
+                                            String highlighted = InfoExtractor.highlightInString(s, cmds.getQuery(), new StaticHtmlFormatter(null, null));
+                                            buff = highlighted.getBytes("utf-8");
+                                        }
 
-                                    String lastModified = "Last-Modified: " + new Date() + CRLF;
+                                    }
+                                    String lastModified = "Last-Modified: " + createDay() + CRLF;
                                     writer.print(HTTP_OK + "Content-Length:" + buff.length + CRLF + lastModified + contentType + CRLF);
                                     writer.write(buff);
                                 } finally {
@@ -232,5 +245,16 @@ public class TinyHttpdImpl extends Thread {
 
         buffer.flush();
         return buffer.toByteArray();
+    }
+
+    private String createDay() {
+        //lets cahce pages for ... month?
+        Date d = new Date();
+        Calendar c1 = new GregorianCalendar();
+        c1.setTime(d);
+        Calendar c2 = new GregorianCalendar();
+        c2.set(Calendar.YEAR, c1.get(Calendar.YEAR));
+        c2.set(Calendar.MONTH, c1.get(Calendar.MONTH));
+        return c2.getTime().toString();
     }
 }

@@ -148,7 +148,7 @@ public class ColoredPlainTextFormatter implements Formatter {
     }
 
     @Override
-    public void summary(String path, String queryString, int infoBefore, int infoAfter) {
+    public String summary(String path, String queryString, int infoBefore, int infoAfter) {
         String sumamry = "";
         try {
             sumamry = infoExtractor.extract(path, queryString, this, infoBefore, infoAfter);
@@ -159,6 +159,7 @@ public class ColoredPlainTextFormatter implements Formatter {
         }
         out.println(sumamry);
         out.println("\n");
+        return sumamry;
     }
 
     @Override
@@ -175,6 +176,16 @@ public class ColoredPlainTextFormatter implements Formatter {
 
     @Override
     public void printLibrary(String library) {
-        out.println("Using library: "+colorToEscapedString(Color.GREEN, true) + library + reset(true));
+        out.println("Using library: " + colorToEscapedString(Color.GREEN, true) + library + reset(true));
+    }
+
+    @Override
+    public String highlitStart(Color c) {
+        return colorToEscapedString(c, false);
+    }
+
+    @Override
+    public String highlitEnd(Color c) {
+        return reset(false);
     }
 }

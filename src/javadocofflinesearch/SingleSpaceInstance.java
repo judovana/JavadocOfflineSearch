@@ -9,6 +9,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Date;
+import java.util.List;
+import javadocofflinesearch.extensions.Vocabulary;
+import javadocofflinesearch.formatters.Formatter;
+import javadocofflinesearch.lucene.InfoExtractor;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.server.ServerLauncher;
 import javadocofflinesearch.tools.Commandline;
@@ -37,13 +41,17 @@ public class SingleSpaceInstance {
             if (cmds.hasServer()) {
                 ServerLauncher lServerLuncher = new ServerLauncher(cmds.getPort());
                 Thread r = new Thread(lServerLuncher);
-                r.setDaemon(true);
+                r.setDaemon(false);
                 r.start();
-                while (true) {
-                    Thread.sleep(100);
-                }
             } else if (cmds.isExctractInfo()) {
-                cmds.createFormatter(System.out).summary(cmds.getExctractInfo(), cmds.getQuery(), cmds.getInfoBefore(), cmds.getInfoAfter());
+                Formatter f = cmds.createFormatter(System.out);
+                String s = f.summary(cmds.getExctractInfo(), cmds.getQuery(), cmds.getInfoBefore(), cmds.getInfoAfter());
+                extendedDidYouMeant(s, f);
+            } else if (cmds.isHighligt()) {
+                Formatter f = cmds.createFormatter(System.out);
+                String highlighted = InfoExtractor.highlightInDoc(cmds.getHighligtInfo(), cmds.getQuery(), f);
+                System.out.println(highlighted);
+                extendedDidYouMeant(highlighted, f);
             } else if (cmds.hasPrintFirefoxEngine()) {
                 printFirefox();
             } else {
@@ -62,6 +70,15 @@ public class SingleSpaceInstance {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void extendedDidYouMeant(String s, Formatter f) {
+        if (s.length() < 15) {
+            List<Vocabulary> vcs = LibraryManager.getLibraryManager().getAllVocabularies();
+            for (Vocabulary vc : vcs) {
+                MainIndex.didYouMent(cmds.getQuery(), f, 10, vc);
+            }
         }
     }
 

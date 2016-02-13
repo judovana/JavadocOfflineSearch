@@ -5,6 +5,7 @@
  */
 package javadocofflinesearch.formatters;
 
+import java.awt.Color;
 import java.io.PrintStream;
 import java.util.List;
 import javadocofflinesearch.lucene.InfoExtractor;
@@ -85,7 +86,7 @@ public class PlainTextFormatter implements Formatter {
     }
 
     @Override
-    public void summary(String path, String queryString, int infoBefore, int infoAfter) {
+    public String summary(String path, String queryString, int infoBefore, int infoAfter) {
         String sumamry;
         try {
             sumamry = infoExtractor.extract(path, queryString, this, infoBefore, infoAfter);
@@ -96,6 +97,7 @@ public class PlainTextFormatter implements Formatter {
         }
         out.println(sumamry);
         out.println("\n");
+        return sumamry;
     }
 
     @Override
@@ -112,10 +114,20 @@ public class PlainTextFormatter implements Formatter {
     public void pages(int from, int to, int total) {
 
     }
-    
+
     @Override
     public void printLibrary(String library) {
-        out.println("Using library: "+ library);
+        out.println("Using library: " + library);
+    }
+
+    @Override
+    public String highlitStart(Color c) {
+        return "\n!!!\n";
+    }
+
+    @Override
+    public String highlitEnd(Color c) {
+        return "\n!!!\n";
     }
 
 }

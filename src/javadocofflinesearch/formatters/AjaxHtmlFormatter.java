@@ -21,10 +21,12 @@ public class AjaxHtmlFormatter extends SearchableHtmlFormatter {
     }
 
     @Override
-    public void summary(String path, String queryString, int infoBefore, int infoAfter) {
+    public String summary(String path, String queryString, int infoBefore, int infoAfter) {
+        String s = "strange query to server";
         out.println("<div>");
-        out.println("strange query to server");
+        out.println(s);
         out.println("</div>");
+        return s;
     }
 
 }

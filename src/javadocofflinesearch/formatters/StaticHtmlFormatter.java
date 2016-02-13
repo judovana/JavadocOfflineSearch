@@ -115,7 +115,7 @@ public class StaticHtmlFormatter implements Formatter {
     }
 
     @Override
-    public void summary(String path, String queryString, int infoBefore, int infoAfter) {
+    public String summary(String path, String queryString, int infoBefore, int infoAfter) {
         String sumamry;
         out.println("<div>");
         try {
@@ -136,6 +136,7 @@ public class StaticHtmlFormatter implements Formatter {
         out.print("</small>");
         out.println("</div>");
         out.println("<br/>");
+        return sumamry;
     }
 
     @Override
@@ -153,6 +154,17 @@ public class StaticHtmlFormatter implements Formatter {
     @Override
     public void printLibrary(String library) {
         out.println("Using library: " + "<b>" + library + "</b><br/>");
+    }
+
+    @Override
+    public String highlitStart(Color c) {
+        String hexColor = String.format("#%06X", (0xFFFFFF & c.getRGB()));
+        return "<span style='background-color: " + hexColor + ";'>";
+    }
+
+    @Override
+    public String highlitEnd(Color c) {
+        return "</span>";
     }
 
 }

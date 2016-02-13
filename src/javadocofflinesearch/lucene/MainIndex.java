@@ -49,7 +49,7 @@ public class MainIndex {
         this.hc = new HrefCounter(settings.getSetup().getCacheHome());
         this.vocabualry = new Vocabulary(settings.getSetup().getCacheHome());
         this.streamizer = new StreamCrossroad(hc, vocabualry);
-        this.settings=settings;
+        this.settings = settings;
     }
 
     public boolean checkInitialized() throws IOException {
@@ -117,19 +117,7 @@ public class MainIndex {
             Date start = new Date();
             TopDocs found = searcher.search(query, Integer.MAX_VALUE);
             if (found.totalHits < settings.getDidYouMeantDeadLine()) {
-                List<String> l1 = vocabualry.didYouMean(settings.getDidYouMeantCount(), queryString);
-                List<String> l2 = new ArrayList<>(0);
-                List<String> l3 = new ArrayList<>(0);
-
-                String[] sps = queryString.split("\\s+");
-                if (sps.length > 1) {
-                    l2 = vocabualry.didYouMean(settings.getDidYouMeantCount(), sps);
-                }
-                String[] ws = queryString.split("[\\W]");
-                if (ws.length > sps.length) {
-                    l3 = vocabualry.didYouMean(settings.getDidYouMeantCount(), ws);
-                }
-                f.couldYouMeant("Could you meant:", l1, l2, l3);
+                didYouMent(settings, queryString, f);
 
             }
             Date end = new Date();
@@ -180,5 +168,30 @@ public class MainIndex {
         }
     }
 
+    public static void didYouMent(String queryString, Formatter f, int count, Vocabulary v) {
+        List<String>[] r = couldYouMean(v, count, queryString);
+        f.couldYouMeant("Could you meant:", r);
+    }
+
+    private static List<String>[] couldYouMean(Vocabulary vocabualry, int didYouMeantCount, String queryString) {
+        List<String> l1 = vocabualry.didYouMean(didYouMeantCount, queryString);
+        List<String> l2 = new ArrayList<>(0);
+        List<String> l3 = new ArrayList<>(0);
+
+        String[] sps = queryString.split("\\s+");
+        if (sps.length > 1) {
+            l2 = vocabualry.didYouMean(didYouMeantCount, sps);
+        }
+        String[] ws = queryString.split("[\\W]");
+        if (ws.length > sps.length) {
+            l3 = vocabualry.didYouMean(didYouMeantCount, ws);
+        }
+
+        return new List[]{l1, l2, l3};
+    }
+
+    private void didYouMent(SearchSettings settings, String queryString, Formatter f) {
+        didYouMent(queryString, f, settings.getDidYouMeantCount(), vocabualry);
+    }
 
 }
