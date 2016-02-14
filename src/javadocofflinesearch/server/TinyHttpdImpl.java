@@ -184,15 +184,19 @@ public class TinyHttpdImpl extends Thread {
                                         buff = streamToBYteArray(decodingStream);
                                     }
 
-                                    if (cmds.isHighlight() || cmds.isJump()) {
+                                    if (cmds.isHighlight() || cmds.isJump() || cmds.isPdf2txt()) {
                                         String ll = potentionalFile.toLowerCase();
                                         if (!ll.endsWith(".pdf") || cmds.isPdf2txt()) {
                                             String s = decodedPdf;
                                             if (s == null) {
                                                 s = new String(buff, "utf-8");
                                             }
-                                            String highlighted = InfoExtractor.highlightInString(s, cmds.getQuery(), new StaticHtmlFormatter(null, null), cmds.isHighlight(), cmds.isJump(), potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm"));
-                                            buff = highlighted.getBytes("utf-8");
+                                            if (cmds.isHighlight() || cmds.isJump()) {
+                                                String highlighted = InfoExtractor.highlightInString(s, cmds.getQuery(), new StaticHtmlFormatter(null, null), cmds.isHighlight(), cmds.isJump(), potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm"));
+                                                buff = highlighted.getBytes("utf-8");
+                                            } else {
+                                                buff = s.getBytes("utf-8");
+                                            }
                                         }
 
                                     }

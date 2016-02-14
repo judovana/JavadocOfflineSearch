@@ -128,7 +128,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("  <input type=\"checkbox\" name=\"" + higlight + "\" value=\"true\" " + getCheckedHighlight() + "/> " + " Highlight. You must <b>rerun</b> the search(html only)" + "<br/>");
         out.println("  <u>"+jump+" may lead to invisible part. Try adjust the number behind anchor <b>#</b>. You can check also individual tokens.</u><br/>");
         out.println("  <input type=\"checkbox\" name=\"" + jump + "\" value=\"true\" " + getCheckedJump() + "/> " + " Jump to (first of) matches. You must <b>rerun</b> the search(html only)" + "<br/>");
-        out.println("  <input type=\"checkbox\" name=\"" + pdf2txt + "\" value=\"true\" " + getCheckedPdf2Text() + "/> " + " Allow jump and highlight in pdfs. You must <b>rerun</b> the search(html only)" + "<br/>");
+        out.println("  <input type=\"checkbox\" name=\"" + pdf2txt + "\" value=\"true\" " + getCheckedPdf2Text() + "/> " + " Allow jump and highlight in pdfs. You must <b>rerun</b> the search(pdf2txt)" + "<br/>");
         out.println("</span>");
         out.println("</span>");
         //without submitbutton, the enter key do not work when more then one input type 'text' is presented
