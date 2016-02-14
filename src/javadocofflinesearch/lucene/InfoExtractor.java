@@ -90,26 +90,41 @@ public class InfoExtractor {
         return result.append("...").toString();
     }
 
-    public static String highlightInDoc(String url, String queryString, Formatter f) throws IOException, SAXException, ParserConfigurationException {
+    public static String highlightInDoc(String url, String queryString, Formatter f, boolean high, boolean jump) throws IOException, SAXException, ParserConfigurationException {
         String s = new StreamCrossroad(null, null).tryURL2(url);
-        return highlightInString(s, queryString, f);
+        return highlightInString(s, queryString, f, high, jump, url.toLowerCase().endsWith(".html") || url.toLowerCase().endsWith(".htm"));
 
     }
 
-    public static String highlightInString(String s, String queryString, Formatter f) throws IOException, SAXException, ParserConfigurationException {
+    public static String highlightInString(String s, String queryString, Formatter f, boolean high, boolean jump, boolean html) throws IOException, SAXException, ParserConfigurationException {
+        //html is now unused
+        // you cans ee that this code is inserting anchors inside tags or into head or whatever
+        //hmtl is relict, when I was trying to filter those invalid palces out
+        //everything i tried was to stinking like bug
         Pattern p = Pattern.compile("(?i)" + queryString.trim().replaceAll("\\s+", "|"));
         Matcher m = p.matcher(s);
         StringBuilder result = new StringBuilder();
         int start = 0;
         Map<String, Color> colors = new HashMap();
+        Map<String, Integer> mathces = new HashMap();
+        int total = 0;
         while (m.find()) {
-
             String match = s.substring(m.start(), m.end());
+            String before = s.substring(start, m.start());
             Color c = getColor(match.toLowerCase(), colors);
-            result.append(s.substring(start, m.start()));
-            result.append(f.highlitStart(c));
+            total++;
+            result.append(before);
+            String mach = getMach(match.toLowerCase(), mathces);
+            if (jump) {
+                result.append(f.anchors("all-" + total, mach));
+            }
+            if (high) {
+                result.append(f.highlitStart(c));
+            }
             result.append(match);
-            result.append(f.highlitEnd(c));
+            if (high) {
+                result.append(f.highlitEnd(c));
+            }
             start = m.end();
 
         }
@@ -125,6 +140,17 @@ public class InfoExtractor {
         c = createColor(colors.size());
         colors.put(s, c);
         return c;
+    }
+
+    private static String getMach(String s, Map<String, Integer> mathces) {
+        Integer c = mathces.get(s);
+        if (c != null) {
+            c = c + 1;
+            mathces.put(s, c);
+            return s + "-" + c;
+        }
+        mathces.put(s, 1);
+        return "1";
     }
 
     private static Color createColor(int size) {

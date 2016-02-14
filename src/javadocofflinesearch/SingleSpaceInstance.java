@@ -49,7 +49,7 @@ public class SingleSpaceInstance {
                 extendedDidYouMeant(s, f);
             } else if (cmds.isHighligt()) {
                 Formatter f = cmds.createFormatter(System.out);
-                String highlighted = InfoExtractor.highlightInDoc(cmds.getHighligtInfo(), cmds.getQuery(), f);
+                String highlighted = InfoExtractor.highlightInDoc(cmds.getHighligtInfo(), cmds.getQuery(), f, true, false);
                 System.out.println(highlighted);
                 extendedDidYouMeant(highlighted, f);
             } else if (cmds.hasPrintFirefoxEngine()) {

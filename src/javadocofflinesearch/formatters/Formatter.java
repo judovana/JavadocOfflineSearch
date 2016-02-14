@@ -46,4 +46,6 @@ public interface Formatter {
 
     public String highlitEnd(Color c);
 
+    public String anchors(String string, String mach);
+
 }

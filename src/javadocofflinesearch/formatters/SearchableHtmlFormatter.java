@@ -6,7 +6,9 @@
 package javadocofflinesearch.formatters;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import javadocofflinesearch.server.WebParams;
 import javadocofflinesearch.tools.Commandline;
@@ -26,6 +28,8 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
     public static final String previewMaxLoad = "previewMaxLoad";
     public static final String merge = Commandline.MERGE_COMAPRATORS;
     public static final String higlight = Commandline.HIGHLIGHT;
+    public static final String jump = "jump";
+    public static final String pdf2txt = "pdf2txt";
     public static final String query = Commandline.QUERY;
     public static final String library = Commandline.LIBRARY;
     public static final String noInfo = Commandline.NO_INFO;
@@ -41,6 +45,7 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
 
     //special field to reset item to start form when clicekd via "pages link"
     public static final String bypage = "bypage";
+    public static final String jumpPrefix = "JDoS";
 
     public SearchableHtmlFormatter(PrintStream out, LibrarySetup setup) {
         super(out, setup);
@@ -119,7 +124,11 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         out.println("  <input type=\"text\"  id='t7' name=\"" + records + "\" value=\"" + wasRecords() + "\"/> items per page<br/>");
         out.println("  <input type=\"text\"  id='t8' name=\"" + previewMaxShow + "\" value=\"" + wasMS() + "\"/> items to show in preview<br/>");
         out.println("  <input type=\"text\"  id='t9' name=\"" + previewMaxLoad + "\" value=\"" + wasML() + "\"/> items to load to show in preview<br/>");
+        out.println("  <u>Both "+higlight+" and "+jump+" are transforming output text without any futher checks. May break a lot (broken links...)!</u><br/>");
         out.println("  <input type=\"checkbox\" name=\"" + higlight + "\" value=\"true\" " + getCheckedHighlight() + "/> " + " Highlight. You must <b>rerun</b> the search(html only)" + "<br/>");
+        out.println("  <u>"+jump+" may lead to invisible part. Try adjust the number behind anchor <b>#</b>. You can check also individual tokens.</u><br/>");
+        out.println("  <input type=\"checkbox\" name=\"" + jump + "\" value=\"true\" " + getCheckedJump() + "/> " + " Jump to (first of) matches. You must <b>rerun</b> the search(html only)" + "<br/>");
+        out.println("  <input type=\"checkbox\" name=\"" + pdf2txt + "\" value=\"true\" " + getCheckedPdf2Text() + "/> " + " Allow jump and highlight in pdfs. You must <b>rerun</b> the search(html only)" + "<br/>");
         out.println("</span>");
         out.println("</span>");
         //without submitbutton, the enter key do not work when more then one input type 'text' is presented
@@ -288,6 +297,28 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
         return "";
     }
 
+    private String getCheckedJump() {
+        if (defaults != null) {
+            if (defaults.isJump()) {
+                return CHECKED;
+            } else {
+                return "";
+            }
+        }
+        return "";
+    }
+
+    private String getCheckedPdf2Text() {
+        if (defaults != null) {
+            if (defaults.isPdf2txt()) {
+                return CHECKED;
+            } else {
+                return "";
+            }
+        }
+        return "";
+    }
+
     private String getWasshowAlsoPdfInfoSeelcted() {
         if (defaults != null) {
             if (defaults.isNegatePdf()) {
@@ -328,8 +359,31 @@ public class SearchableHtmlFormatter extends StaticHtmlFormatter {
 
     private String createCommand() {
         if (defaults != null) {
-            if (defaults.isHighlight()) {
-                return "?" + higlight + "=true" + "&" + query + "=" + defaults.getQuery();
+            if (defaults.isHighlight() || defaults.isInfo() || defaults.isPdf2txt()) {
+
+                List<String> chunks = new ArrayList<>(4);
+                chunks.add(query + "=" + defaults.getQuery());
+                if (defaults.isHighlight()) {
+                    chunks.add(higlight + "=true");
+                }
+                if (defaults.isJump()) {
+                    chunks.add(jump + "=true");
+                }
+                if (defaults.isPdf2txt()) {
+                    chunks.add(pdf2txt + "=true");
+                }
+                StringBuilder sb = new StringBuilder("?");
+                for (int i = 0; i < chunks.size(); i++) {
+                    String get = chunks.get(i);
+                    sb.append(get);
+                    if (i < chunks.size() - 1) {
+                        sb.append("&");
+                    }
+                }
+                if (defaults.isJump()) {
+                    sb.append("#" + jumpPrefix + "-all-1");
+                }
+                return sb.toString();
             }
         }
         return "";

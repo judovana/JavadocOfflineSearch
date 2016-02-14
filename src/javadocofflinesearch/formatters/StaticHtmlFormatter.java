@@ -167,4 +167,10 @@ public class StaticHtmlFormatter implements Formatter {
         return "</span>";
     }
 
+    @Override
+    public String anchors(String all, String mach) {
+        return "<a name='" + SearchableHtmlFormatter.jumpPrefix + "-" + all + "'/>"
+                + "<a name='" + SearchableHtmlFormatter.jumpPrefix + "-" + mach + "'/>";
+    }
+
 }

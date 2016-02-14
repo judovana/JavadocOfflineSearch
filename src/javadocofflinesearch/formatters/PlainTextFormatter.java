@@ -130,4 +130,9 @@ public class PlainTextFormatter implements Formatter {
         return "\n!!!\n";
     }
 
+    @Override
+    public String anchors(String string, String mach) {
+        return "";
+    }
+
 }

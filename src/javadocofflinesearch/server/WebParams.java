@@ -29,6 +29,8 @@ public class WebParams implements SearchSettings {
 
     private boolean wasFromPage = false;
     private boolean highlight = false;
+    private boolean jump = false;
+    private boolean pdf2txt = false;
 
     private final String origQuery;
 
@@ -81,6 +83,14 @@ public class WebParams implements SearchSettings {
                 } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.higlight)) {
                     if (pair[1].equalsIgnoreCase("true")) {
                         highlight = true;
+                    }
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.jump)) {
+                    if (pair[1].equalsIgnoreCase("true")) {
+                        jump = true;
+                    }
+                } else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.pdf2txt)) {
+                    if (pair[1].equalsIgnoreCase("true")) {
+                        pdf2txt = true;
                     }
                 }//now less usefull stuff 
                 else if (pair[0].equalsIgnoreCase(SearchableHtmlFormatter.infoBefore)) {
@@ -315,6 +325,14 @@ public class WebParams implements SearchSettings {
 
     public boolean isHighlight() {
         return highlight;
+    }
+
+    public boolean isJump() {
+        return jump;
+    }
+
+    public boolean isPdf2txt() {
+        return pdf2txt;
     }
 
 }

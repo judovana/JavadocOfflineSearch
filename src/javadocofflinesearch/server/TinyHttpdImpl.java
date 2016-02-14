@@ -55,6 +55,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import javadocofflinesearch.formatters.SearchableHtmlFormatter;
 import javadocofflinesearch.formatters.StaticHtmlFormatter;
+import javadocofflinesearch.htmlprocessing.PdfAttempter;
+import javadocofflinesearch.htmlprocessing.StreamCrossroad;
 import javadocofflinesearch.lucene.InfoExtractor;
 import javadocofflinesearch.lucene.MainIndex;
 import javadocofflinesearch.tools.LevenshteinDistance;
@@ -132,9 +134,7 @@ public class TinyHttpdImpl extends Thread {
                     if (isGetRequest) {
                         if (filePath.trim().length() <= 1) {
                             SearchableHtmlFormatter xr = new SearchableHtmlFormatter(writer, LibraryManager.getLibraryManager().getLibrarySetup(null));
-                            contentType = "Content-Type: ";
-                            contentType += "text/html";
-                            contentType += CRLF;
+                            contentType = getHtmlContetnType();
                             writer.print(HTTP_OK + contentType + CRLF);
                             xr.haders();
                             xr.tail();
@@ -161,29 +161,37 @@ public class TinyHttpdImpl extends Thread {
                                     }
                                     System.out.println("Returning file: " + potentionalFile);
                                     if (potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm")) {
-                                        contentType = "Content-Type: ";
-                                        contentType += "text/html";
-                                        contentType += CRLF;
+                                        contentType = getHtmlContetnType();
                                     }
                                     if (potentionalFile.toLowerCase().endsWith(".css")) {
-                                        contentType = "Content-Type: ";
-                                        contentType += "text/css";
-                                        contentType += CRLF;
+                                        contentType = getContetnType("text/css");
                                     }
                                     if (potentionalFile.toLowerCase().endsWith(".pdf")) {
-                                        contentType = "Content-Type: ";
-                                        contentType += "application/pdf";
-                                        contentType += CRLF;
+                                        contentType = getContetnType("application/pdf");
                                     }
                                     //this is learning, more this hreff is clicked, more is recorded
                                     LibraryManager.getLibraryManager().clickedHrefTo(LevenshteinDistance.sanitizeFileUrl(l));
-                                    byte[] buff = streamToBYteArray(decodingStream);
+
                                     WebParams cmds = new WebParams(query);
-                                    if (cmds.isHighlight()) {
+                                    byte[] buff = null;
+                                    String decodedPdf = null;//this is saving one byte-string (loong) transformation)
+                                    if (cmds.isPdf2txt() && potentionalFile.toLowerCase().endsWith(".pdf")) {
+                                        PdfAttempter pdfAttempter = new PdfAttempter(null);
+                                        decodedPdf = pdfAttempter.pdftoText(decodingStream, false);
+                                        decodedPdf = decodedPdf.replaceAll("\n", "<br/>");
+                                        contentType = getHtmlContetnType();
+                                    } else {
+                                        buff = streamToBYteArray(decodingStream);
+                                    }
+
+                                    if (cmds.isHighlight() || cmds.isJump()) {
                                         String ll = potentionalFile.toLowerCase();
-                                        if (ll.endsWith(".html") || ll.endsWith(".htm")||ll.endsWith(".txt")) {
-                                            String s = new String(buff, "utf-8");
-                                            String highlighted = InfoExtractor.highlightInString(s, cmds.getQuery(), new StaticHtmlFormatter(null, null));
+                                        if (!ll.endsWith(".pdf") || cmds.isPdf2txt()) {
+                                            String s = decodedPdf;
+                                            if (s == null) {
+                                                s = new String(buff, "utf-8");
+                                            }
+                                            String highlighted = InfoExtractor.highlightInString(s, cmds.getQuery(), new StaticHtmlFormatter(null, null), cmds.isHighlight(), cmds.isJump(), potentionalFile.toLowerCase().endsWith(".html") || potentionalFile.toLowerCase().endsWith(".htm"));
                                             buff = highlighted.getBytes("utf-8");
                                         }
 
@@ -196,9 +204,7 @@ public class TinyHttpdImpl extends Thread {
                                 }
                             } else if (command.toLowerCase().equals("/search")) {
                                 WebParams cmds = new WebParams(query);
-                                contentType = "Content-Type: ";
-                                contentType += "text/html";
-                                contentType += CRLF;
+                                contentType = getHtmlContetnType();
                                 writer.print(HTTP_OK + contentType + CRLF);
                                 MainIndex mainIndex = mainIndexes.get(cmds.getLibrary());
                                 if (mainIndex == null) {
@@ -233,6 +239,18 @@ public class TinyHttpdImpl extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getHtmlContetnType() {
+        return getContetnType("text/html");
+
+    }
+
+    private static String getContetnType(String type) {
+        String contentType = "Content-Type: ";
+        contentType += type;
+        contentType += CRLF;
+        return contentType;
     }
 
     private static byte[] streamToBYteArray(InputStream is) throws IOException {

@@ -5,9 +5,6 @@
  */
 package javadocofflinesearch.htmlprocessing;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import javadocofflinesearch.extensions.Vocabulary;
@@ -24,11 +21,11 @@ public class PdfAttempter {
 
     private final Vocabulary vc;
 
-    PdfAttempter(Vocabulary vocabualry) {
+    public PdfAttempter(Vocabulary vocabualry) {
         this.vc = vocabualry;
     }
 
-    String pdftoText(InputStream is, boolean stats) throws IOException {
+    public  String pdftoText(InputStream is, boolean stats) throws IOException {
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         try {

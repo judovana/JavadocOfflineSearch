@@ -188,4 +188,9 @@ public class ColoredPlainTextFormatter implements Formatter {
     public String highlitEnd(Color c) {
         return reset(false);
     }
+
+    @Override
+    public String anchors(String string, String mach) {
+        return "";
+    }
 }
