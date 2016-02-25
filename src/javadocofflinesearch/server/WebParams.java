@@ -167,8 +167,8 @@ public class WebParams implements SearchSettings {
     /**
      * for sake of record.
      *
-     * @return no longer of course override
-     * @Overrode
+     * @return
+	 * no longer of course override
      */
     public boolean isFileForced() {
         //http://kb.mozillazine.org/Links_to_local_pages_do_not_work
