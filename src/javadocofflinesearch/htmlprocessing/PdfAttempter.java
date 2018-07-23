@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import javadocofflinesearch.extensions.Vocabulary;
 import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
+
 
 /**
  *
@@ -29,7 +31,7 @@ public class PdfAttempter {
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         try {
-            PDFParser parser = new PDFParser(is);
+            PDFParser parser = new PDFParser(new RandomAccessBufferedFileInputStream(is));
             parser.parse();
             cosDoc = parser.getDocument();
             PDFTextStripper pdfStripper = new PDFTextStripper();
