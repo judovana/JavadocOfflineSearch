@@ -104,7 +104,7 @@ public class StaticHtmlFormatter implements Formatter {
     }
 
     @Override
-    public void resulsSummary(String foundTitle, int totalHits, String timeTitle, long time, String units) {
+    public void resulsSummary(String foundTitle, long totalHits, String timeTitle, long time, String units) {
         out.println(foundTitle + " " + "<b>" + totalHits + "</b>");
         out.println(timeTitle + " " + "<b>" + time + "</b>" + units);
     }

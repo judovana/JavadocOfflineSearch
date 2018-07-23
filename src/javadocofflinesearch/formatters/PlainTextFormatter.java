@@ -79,7 +79,7 @@ public class PlainTextFormatter implements Formatter {
     }
 
     @Override
-    public void resulsSummary(String foundTitle, int totalHits, String timeTitle, long time, String units) {
+    public void resulsSummary(String foundTitle, long totalHits, String timeTitle, long time, String units) {
         out.println(foundTitle + " " + totalHits);
         out.println(timeTitle + " " + time + units);
         out.println("");

@@ -56,7 +56,7 @@ public class ColoredPlainTextFormatter implements Formatter {
     }
 
     @Override
-    public void resulsSummary(String foundTitle, int totalHits, String timeTitle, long time, String units) {
+    public void resulsSummary(String foundTitle, long totalHits, String timeTitle, long time, String units) {
         out.println(foundTitle + " " + colorToEscapedString(Color.GREEN, true) + totalHits + reset(true));
         out.println(timeTitle + " " + colorToEscapedString(Color.GREEN, true) + time + reset(true) + units);
         out.println("");
