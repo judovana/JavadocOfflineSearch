@@ -30,7 +30,7 @@ public interface Formatter {
 
     public void couldYouMeant(String title, List<String>... l);
 
-    public void resulsSummary(String foundTitle, int totalHits, String timeTitle, long time, String units);
+    public void resulsSummary(String foundTitle, long totalHits, String timeTitle, long time, String units);
 
     public String summary(String path, String queryString, int infoBefore, int infoAfter);
 
