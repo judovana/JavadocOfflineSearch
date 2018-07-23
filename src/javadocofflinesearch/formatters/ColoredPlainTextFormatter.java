@@ -28,7 +28,7 @@ public class ColoredPlainTextFormatter implements Formatter {
     }
 
     @Override
-    public void title(int current, int totalHits, String title) {
+    public void title(int current, long totalHits, String title) {
         out.println(colorToEscapedString(Color.yellow, true) + current + "/" + totalHits + ") " + title + reset(true));
     }
 

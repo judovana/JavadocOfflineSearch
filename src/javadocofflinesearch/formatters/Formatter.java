@@ -22,7 +22,7 @@ public interface Formatter {
 
     public void tail();
 
-    public void title(int i, int totalHits, String title);
+    public void title(int i, long totalHits, String title);
 
     public void file(String string, int page, float score);
 

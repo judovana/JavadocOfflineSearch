@@ -44,7 +44,7 @@ public class StaticHtmlFormatter implements Formatter {
     }
 
     @Override
-    public void title(int current, int totalHits, String title) {
+    public void title(int current, long totalHits, String title) {
         out.println("<h3 style='margin-bottom: 0;'>" + current + "/" + totalHits + ") " + title + "</h3>");
     }
 
