@@ -116,12 +116,12 @@ public class MainIndex {
 
             Date start = new Date();
             TopDocs found = searcher.search(query, Integer.MAX_VALUE);
-            if (found.totalHits < settings.getDidYouMeantDeadLine()) {
+            if (found.totalHits.value < settings.getDidYouMeantDeadLine()) {
                 didYouMent(settings, queryString, f);
 
             }
             Date end = new Date();
-            f.resulsSummary("Found:", found.totalHits, "Time:", (end.getTime() - start.getTime()), "ms");
+            f.resulsSummary("Found:", found.totalHits.value, "Time:", (end.getTime() - start.getTime()), "ms");
             PagedScoreDocs[] wrapped = new PagedScoreDocs[found.scoreDocs.length];
             for (int i = 0; i < found.scoreDocs.length; i++) {
                 ScoreDoc arr = found.scoreDocs[i];
@@ -149,7 +149,7 @@ public class MainIndex {
                 if (settings.isOmitArchives() && doc.getPath().startsWith("jar")) {
 
                 } else {
-                    f.title((i + 1), found.totalHits, doc.getTitle());
+                    f.title((i + 1), found.totalHits.value, doc.getTitle());
                     f.file(doc.getPath(), doc.getPage(), doc.getArr().score);
                     if (settings.isInfo()) {
                         //notpdf OR
