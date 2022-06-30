@@ -29,7 +29,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.store.NIOFSDirectory;
 
 /**
  *
@@ -85,7 +85,7 @@ public class MainIndex {
     private void index(Path... sources) throws IOException {
         Analyzer analyzer = new StandardAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-        Directory index = new SimpleFSDirectory(INDEX.toPath());
+        Directory index = new NIOFSDirectory(INDEX.toPath());
         //iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         try (IndexWriter writer = new IndexWriter(index, iwc)) {
@@ -101,7 +101,7 @@ public class MainIndex {
         if (queryString.length() == 0) {
             return;
         }
-        Directory index = new SimpleFSDirectory(INDEX.toPath());
+        Directory index = new NIOFSDirectory(INDEX.toPath());
         try (IndexReader reader = DirectoryReader.open(index)) {
             IndexSearcher searcher = new IndexSearcher(reader);
             Analyzer analyzer = new StandardAnalyzer();
